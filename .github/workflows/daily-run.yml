@@ -1,0 +1,50 @@
+name: Daily Momentum Run
+
+on:
+  schedule:
+    # Mo-Fr 17:00 UTC = 18:00 CEST (EU market close + 1h buffer)
+    - cron: '0 17 * * 1-5'
+  workflow_dispatch:  # allow manual trigger
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run momentum bot
+        env:
+          IG_API_KEY:    ${{ secrets.IG_API_KEY }}
+          IG_USERNAME:   ${{ secrets.IG_USERNAME }}
+          IG_PASSWORD:   ${{ secrets.IG_PASSWORD }}
+          IG_ACC_TYPE:   ${{ secrets.IG_ACC_TYPE }}
+          IG_ACC_NUMBER: ${{ secrets.IG_ACC_NUMBER }}
+        run: python main.py
+
+      - name: Upload daily report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-report-${{ github.run_id }}
+          path: reports/
+          retention-days: 30
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-logs-${{ github.run_id }}
+          path: logs/
+          retention-days: 14
