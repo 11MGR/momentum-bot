@@ -20,54 +20,40 @@ if _missing:
 # ─ UNIVERSE ───────────────────────────────────────────────────────────────────
 #
 # Thematisches Universe: Tech / Halbleiter / Europaeische Sovereignty-Plays
+# Alle Eintraege sind direkte Yahoo-Finance-Ticker.
+# YAHOO_MAP ist 1:1 (mit optionalen Korrekturen fuer Abweichungen).
 #
-# Fokus:
-#   - Halbleiter & Chip-Equipment (ASML, Infineon, STMicro, BE Semi, Soitec)
-#   - Consumer Tech / Xiaomi (HK-listed)
-#   - Europaeische Verteidigung & Aerospace (Rheinmetall, Airbus, Leonardo,
-#     Thales, Safran, Rolls-Royce) -- Abloese US/CN-Abhaengigkeit
-#   - Industrials / Automation (Siemens, ABB, Schneider Electric, Siemens Energy)
-#   - Regime-Filter bleibt NASDAQ 100 (technologie-lastig)
-#
-# WICHTIG: Diese Werte sind KEINE IG-Epics fuer echte Orders --
-#   sie dienen ausschliesslich der Momentum-Berechnung via Yahoo Finance.
-#   Fuer echte IG-Orders muessen die passenden IG-Epics separat gepflegt werden.
-#   Das UNIVERSE-Feld enthaelt hier die Yahoo-Finance-Ticker direkt.
-
 UNIVERSE = [
     # ── Halbleiter & Chip-Equipment ─────────────────────────────────────────────
-    "ASML",          # ASML Holding - weltweiter EUV-Monopolist
-    "IFX.DE",        # Infineon Technologies - DE, Automotive + Power Chips
-    "STM",           # STMicroelectronics - EU, Mixed-Signal / Automotive
-    "BESI.AS",       # BE Semiconductor Industries - NL, Packaging Equipment
-    "SOI.PA",        # Soitec - FR, Silicon-on-Insulator Wafer
-    "AMAT",          # Applied Materials - US, aber Kern-Zulieferer ASML-Chain
+    "ASML",      # ASML Holding (NL) - EUV-Lithographie-Monopolist
+    "NVDA",      # NVIDIA (US) - KI-Chips / GPU, unverzichtbar im Sektor
+    "IFX.DE",    # Infineon Technologies (DE) - Automotive + Power Chips
+    "STM",       # STMicroelectronics (EU/US) - Mixed-Signal / Automotive
+    "BESI.AS",   # BE Semiconductor Industries (NL) - Packaging Equipment
+    "SOI.PA",    # Soitec (FR) - Silicon-on-Insulator Wafer
+    "AMAT",      # Applied Materials (US) - Kern-Zulieferer der ASML-Chain
     # ── Consumer Tech / Xiaomi ────────────────────────────────────────────────
-    "1810.HK",       # Xiaomi Corp - HK-listed, EV + Consumer Electronics
+    "1810.HK",   # Xiaomi Corp (HK) - Consumer Electronics + EV
     # ── Europaeische Verteidigung & Aerospace (Sovereignty) ───────────────
-    "RHM.DE",        # Rheinmetall - DE, Ruestung / Fahrzeuge
-    "AIR.PA",        # Airbus - EU, Aerospace / Defence
-    "LDO.MI",        # Leonardo - IT, Defence Electronics & Helicopters
-    "HO.PA",         # Thales - FR, Defence Electronics / Cyber / Space
-    "SAF.PA",        # Safran - FR, Triebwerke / Avionics
-    "RR.L",          # Rolls-Royce Holdings - UK, Triebwerke / Micro-Reaktoren
-    "BAYN.DE",       # Hensoldt - nein, lieber: DHER.DE (Diehl) -- nicht verfuegbar
-    "HENSOLDT.DE",   # Hensoldt AG - DE, Radarsysteme
+    "RHM.DE",    # Rheinmetall (DE) - Ruestung / Panzer / Munition
+    "AIR.PA",    # Airbus (EU) - Aerospace / Defence / Raumfahrt
+    "LDO.MI",    # Leonardo (IT) - Defence Electronics / Hubschrauber
+    "HO.PA",     # Thales (FR) - Defence Electronics / Cyber / Space
+    "SAF.PA",    # Safran (FR) - Triebwerke / Avionics
+    "RR.L",      # Rolls-Royce Holdings (UK) - Triebwerke / SMR-Reaktoren
+    "HAG.DE",    # Hensoldt AG (DE) - Radarsysteme / Sensors / EW
     # ── Industrials / Automation / Energie ─────────────────────────────
-    "SIE.DE",        # Siemens AG - DE, Automatisierung / Digital Industries
-    "ABBN.SW",       # ABB Ltd - CH, Robotics / Electrification
-    "SU.PA",         # Schneider Electric - FR, Energiemanagement / IoT
-    "ENR.DE",        # Siemens Energy - DE, Energiewende
-    "VWS.CO",        # Vestas Wind - DK, Windenergie
+    "SIE.DE",    # Siemens AG (DE) - Automatisierung / Digital Industries
+    "ABBN.SW",   # ABB Ltd (CH) - Robotics / Electrification
+    "SU.PA",     # Schneider Electric (FR) - Energiemanagement / IoT
+    "ENR.DE",    # Siemens Energy (DE) - Energiewende / Gasturbinen
+    "VWS.CO",    # Vestas Wind Systems (DK) - Windenergie
 ]
 
-# Yahoo Finance Ticker Map
-# Da wir hier direkt YF-Ticker als UNIVERSE verwenden, ist die Map 1:1
+# Yahoo Finance Ticker Map (1:1 fuer direkte YF-Ticker als Universe)
 YAHOO_MAP = {ticker: ticker for ticker in UNIVERSE}
-# Korrekturen fuer Sonderzeichen / Abweichungen:
-YAHOO_MAP["HENSOLDT.DE"] = "HAG.DE"  # Hensoldt AG an der XETRA
 
-# Epic fuer Regime-Filter: NASDAQ 100 (tech-lastig, passt zum Universe)
+# Regime-Filter: NASDAQ 100 (tech-lastiger Index, passend zum Universe)
 REGIME_EPIC      = "^NDX"
 REGIME_MA_PERIOD = 200
 
@@ -75,12 +61,12 @@ REGIME_MA_PERIOD = 200
 WEIGHTS = {
     "mom_3m":  0.25,  # 3-Monats-Momentum
     "mom_6m":  0.25,  # 6-Monats-Momentum
-    "mom_12m": 0.30,  # 12-Monats-Momentum
-    "hi52w":   0.20,  # Naehe zum 52-Wochen-Hoch
+    "mom_12m": 0.30,  # 12-Monats-Momentum (Trend-Staerke)
+    "hi52w":   0.20,  # Naehe zum 52-Wochen-Hoch (Staerke-Signal)
 }
 
 # ─ BOT PARAMETERS ──────────────────────────────────────────────────────────────
-TOP_N_SIGNALS       = 7     # Top 7 Buy + Top 7 Exit im Report
+TOP_N_SIGNALS       = 7     # Top 7 Buy-Signale + Top 7 Exit im Report
 MAX_POSITIONS       = 5     # max. gleichzeitige Positionen
 RISK_PER_TRADE_PCT  = 0.01  # 1% Account-Risiko pro Trade
 STOP_LOSS_PCT       = 0.02  # 2% Stop-Loss
