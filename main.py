@@ -35,12 +35,14 @@ logger = logging.getLogger("main")
 
 
 def build_table(ranked: list) -> str:
-    """Build a markdown table from a ranked list of (epic, score) tuples."""
+    """Build a markdown table from a ranked list of dicts with 'epic' and 'score'."""
     lines = [
         "| Rank | EPIC | Score |",
         "|------|------|-------|",
     ]
-    for i, (epic, score) in enumerate(ranked, 1):
+    for i, item in enumerate(ranked, 1):
+        epic = item.get("epic", "?")
+        score = item.get("score", 0.0)
         lines.append(f"| {i} | {epic} | {score:.4f} |")
     return "\n".join(lines)
 
@@ -49,7 +51,6 @@ def get_balance(ig: IGClient) -> float:
     """Extract available balance from account info."""
     try:
         info = ig.get_account_info()
-        # IG accounts endpoint returns {"accounts": [{"balance": {"available": ...}}]}
         accounts = info.get("accounts", [])
         if accounts:
             return float(accounts[0].get("balance", {}).get("available", 0))
@@ -73,30 +74,33 @@ def main():
     regime_label = "BULLISH" if bullish else "BEARISH"
     logger.info(f"Market regime: {regime_label}")
 
+    # --- Fetch benchmark prices (used as relative-strength reference) ---
+    logger.info(f"Fetching benchmark prices for {REGIME_EPIC}...")
+    benchmark_prices = get_prices_yf(REGIME_EPIC) or []
+
     # --- Fetch prices for THEMATIC UNIVERSE ---
     logger.info("Fetching price data for universe via Yahoo Finance...")
-    prices = fetch_all_prices_yf(UNIVERSE)
-    logger.info(f"Price data fetched for {len(prices)}/{len(UNIVERSE)} instruments.")
+    price_map = fetch_all_prices_yf(UNIVERSE)
+    logger.info(f"Price data fetched for {len(price_map)}/{len(UNIVERSE)} instruments.")
 
     # --- Score THEMATIC UNIVERSE ---
     logger.info("Scoring universe...")
-    ranked_all = rank_universe(prices)
+    ranked_all = rank_universe(UNIVERSE, price_map, benchmark_prices)
 
     # Top buy signals (positive score, up to TOP_N_SIGNALS)
-    top_signals = [(e, s) for e, s in ranked_all if s > 0][:TOP_N_SIGNALS]
+    top_signals = [r for r in ranked_all if r.get("score", 0) > 0][:TOP_N_SIGNALS]
     # Exit / Avoid signals (negative score)
-    exit_signals = [(e, s) for e, s in ranked_all if s < 0]
+    exit_signals = [r for r in ranked_all if r.get("score", 0) < 0]
 
     # --- Fetch prices for BROAD_UNIVERSE (Score-Only) ---
     logger.info("Fetching price data for BROAD_UNIVERSE via Yahoo Finance...")
-    broad_prices = fetch_all_prices_yf(BROAD_UNIVERSE)
-    logger.info(f"Broad price data fetched for {len(broad_prices)}/{len(BROAD_UNIVERSE)} instruments.")
+    broad_price_map = fetch_all_prices_yf(BROAD_UNIVERSE)
+    logger.info(f"Broad price data fetched for {len(broad_price_map)}/{len(BROAD_UNIVERSE)} instruments.")
 
     # --- Score BROAD_UNIVERSE ---
     logger.info("Scoring BROAD_UNIVERSE...")
-    broad_ranked_all = rank_universe(broad_prices)
-    # Take top BROAD_TOP_N with positive score
-    broad_top = [(e, s) for e, s in broad_ranked_all if s > 0][:BROAD_TOP_N]
+    broad_ranked_all = rank_universe(BROAD_UNIVERSE, broad_price_map, benchmark_prices)
+    broad_top = [r for r in broad_ranked_all if r.get("score", 0) > 0][:BROAD_TOP_N]
 
     # --- Build Report ---
     today = datetime.date.today().isoformat()
