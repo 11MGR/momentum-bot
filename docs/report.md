@@ -7,7 +7,7 @@
 
 ---
 
-## Thematisches Universe - Top Buy Signals
+## 1. Thematisches Universe - Top Buy Signals
 
 | # | EPIC | Score | Starke |
 |---|---|---|---|
@@ -19,7 +19,7 @@
 
 ---
 
-## Score-Only Screening - Broad Universe
+## 2. Score-Only Screening - Broad Universe
 
 | # | EPIC | Score | Starke |
 |---|---|---|---|
@@ -31,7 +31,7 @@
 
 ---
 
-## Exit / Avoid Signals - Thematisches Universe
+## 3. Exit / Avoid Signals - Thematisches Universe
 
 | # | EPIC | Score | Schwache |
 |---|---|---|---|
