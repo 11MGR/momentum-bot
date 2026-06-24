@@ -65,6 +65,7 @@ WEIGHT_REL_STR  = 0.10
 # — PORTFOLIO SETTINGS ————————————————————————————————————————
 TOP_N_SIGNALS       = 5      # top N buy candidates shown in report
 DAILY_LOSS_LIMIT_PCT = 0.02  # kill-switch: halt if daily loss > 2 %
+MAX_POSITIONS       = 5      # max concurrent open positions
 
 # — OUTPUT ————————————————————————————————————————————————————
 REPORT_FILE = "reports/daily_report.md"
