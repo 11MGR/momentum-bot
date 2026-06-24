@@ -21,36 +21,30 @@ if _missing:
     )
 
 # — UNIVERSE ——————————————————————————————————————————————————
-# IG Epic format for German accounts:
-#   UC.D.<TICKER>.CASH.IP  = US shares (Germany trading hours)
-#   ED.D.<TICKER>.CASH.IP  = EU/DAX shares (Germany)
-#   IX.D.<INDEX>.IFD.IP    = CFD Indices
+# IG REST API provides historical prices for Indices, FX and Commodities.
+# Equity shares require a different endpoint and are not available via
+# the standard /prices endpoint in the demo environment.
 UNIVERSE = [
-    # US Large Caps (UC prefix = US shares, German account)
-    "UC.D.AAPL.CASH.IP",
-    "UC.D.MSFT.CASH.IP",
-    "UC.D.NVDA.CASH.IP",
-    "UC.D.GOOGL.CASH.IP",
-    "UC.D.AMZN.CASH.IP",
-    "UC.D.META.CASH.IP",
-    "UC.D.TSLA.CASH.IP",
-    "UC.D.JPM.CASH.IP",
-    "UC.D.V.CASH.IP",
-    "UC.D.UNH.CASH.IP",
-    "UC.D.XOM.CASH.IP",
-    "UC.D.NFLX.CASH.IP",
-    # EU / DAX Large Caps (ED prefix = European shares)
-    "ED.D.SAP.CASH.IP",
-    "ED.D.SIE.CASH.IP",
-    "ED.D.ALV.CASH.IP",
-    "ED.D.MBG.CASH.IP",
-    "ED.D.BMW.CASH.IP",
-    "ED.D.BAYN.CASH.IP",
-    "ED.D.DTE.CASH.IP",
-    # Indices (CFD)
-    "IX.D.DAX.IFD.IP",
-    "IX.D.SPTRD.IFD.IP",
-    "IX.D.NASDAQ.IFD.IP",
+    # Global Equity Indices (CFD)
+    "IX.D.DAX.IFD.IP",          # Germany DAX 40
+    "IX.D.NASDAQ.IFD.IP",       # US Tech 100
+    "IX.D.SPTRD.IFD.IP",        # US 500
+    "IX.D.DOW.IFD.IP",          # Wall Street 30
+    "IX.D.FTSE.IFD.IP",         # UK 100
+    "IX.D.ESXB.IFD.IP",         # Euro Stoxx 50
+    "IX.D.NIKKEI.IFD.IP",       # Japan 225
+    "IX.D.ASX.IFD.IP",          # Australia 200
+    # FX Majors
+    "CS.D.EURUSD.CFD.IP",       # EUR/USD
+    "CS.D.GBPUSD.CFD.IP",       # GBP/USD
+    "CS.D.USDJPY.CFD.IP",       # USD/JPY
+    "CS.D.AUDUSD.CFD.IP",       # AUD/USD
+    "CS.D.USDCHF.CFD.IP",       # USD/CHF
+    # Commodities
+    "CS.D.CFDGOLD.CFD.IP",      # Gold
+    "CS.D.CFDSIVER.CFD.IP",     # Silver
+    "CC.D.CL.UNC.IP",           # Crude Oil (WTI)
+    "CC.D.NG.UNC.IP",           # Natural Gas
 ]
 
 # Epic used for market-regime filter (S&P 500)
