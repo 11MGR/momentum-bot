@@ -14,6 +14,7 @@ import datetime
 from typing import Optional
 
 import yfinance as yf
+import pandas as pd
 
 from config import YAHOO_MAP, REGIME_EPIC
 
@@ -67,7 +68,14 @@ def get_prices_yf(
         logger.warning("yfinance returned no data for %s (%s)", epic, ticker)
         return None
 
-    closes = df["Close"].dropna().tolist()
+    # Handle MultiIndex columns (yfinance >= 0.2.x returns MultiIndex when
+    # downloading a single ticker sometimes)
+    close_col = df["Close"]
+    if isinstance(close_col, pd.DataFrame):
+        # MultiIndex: take the first column
+        close_col = close_col.iloc[:, 0]
+
+    closes = close_col.dropna().tolist()
     if len(closes) < 20:
         logger.warning("Too few data points for %s (%s): %d", epic, ticker, len(closes))
         return None
