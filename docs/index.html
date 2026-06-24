@@ -240,8 +240,8 @@ function parseAndRender(md) {
   const sections = { buy: [], broad: [], exit: [] };
 
   for (const line of lines) {
-    if (line.includes('Thematisches Universe')) { section = 'buy'; continue; }
-    if (line.includes('Score-Only')) { section = 'broad'; continue; }
+        if (line.includes('Exit') || line.includes('Avoid')) { section = 'exit'; continue; }
+            if (line.includes('Top Buy') || (line.includes('Thematisches') && !line.includes('Exit') && !line.includes('Avoid'))) { section = 'buy'; continue; }
     if (line.includes('Exit')) { section = 'exit'; continue; }
     if (!section) continue;
     const m = line.match(/^\|\s*(\d+)\s*\|\s*([\w.\-:]+)\s*\|\s*([\d.\-]+)\s*\|/);
