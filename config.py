@@ -1,11 +1,11 @@
 import os
 
 # ─ IG API CREDENTIALS ────────────────────────────────────────────────
-IG_API_KEY    = os.getenv("IG_API_KEY")          # required
-IG_USERNAME   = os.getenv("IG_USERNAME")         # required
-IG_PASSWORD   = os.getenv("IG_PASSWORD")         # required
-IG_ACC_TYPE   = os.getenv("IG_ACC_TYPE", "DEMO") # DEMO | LIVE
-IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")       # required
+IG_API_KEY    = os.getenv("IG_API_KEY")
+IG_USERNAME   = os.getenv("IG_USERNAME")
+IG_PASSWORD   = os.getenv("IG_PASSWORD")
+IG_ACC_TYPE   = os.getenv("IG_ACC_TYPE", "DEMO")
+IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")
 IG_BASE_URL   = "https://demo-api.ig.com/gateway/deal"
 
 _required = {"IG_API_KEY": IG_API_KEY, "IG_USERNAME": IG_USERNAME,
@@ -17,60 +17,104 @@ if _missing:
         "Set them in Railway > Variables (never hardcode credentials)."
     )
 
-# ─ UNIVERSE ───────────────────────────────────────────────────────────────────
-#
-# Thematisches Universe: Tech / Halbleiter / Europaeische Sovereignty-Plays
-# Alle Eintraege sind direkte Yahoo-Finance-Ticker.
-# YAHOO_MAP ist 1:1 (mit optionalen Korrekturen fuer Abweichungen).
-#
+# ─ THEMATISCHES UNIVERSE ─────────────────────────────────────────────────────
+# Werte nach persoenlichen Interessen: Halbleiter, Tech, EU-Sovereignty,
+# Consumer Electronics (Xiaomi), Industrials/Energie.
 UNIVERSE = [
-    # ── Halbleiter & Chip-Equipment ─────────────────────────────────────────────
-    "ASML",      # ASML Holding (NL) - EUV-Lithographie-Monopolist
-    "NVDA",      # NVIDIA (US) - KI-Chips / GPU, unverzichtbar im Sektor
-    "IFX.DE",    # Infineon Technologies (DE) - Automotive + Power Chips
-    "STM",       # STMicroelectronics (EU/US) - Mixed-Signal / Automotive
-    "BESI.AS",   # BE Semiconductor Industries (NL) - Packaging Equipment
-    "SOI.PA",    # Soitec (FR) - Silicon-on-Insulator Wafer
-    "AMAT",      # Applied Materials (US) - Kern-Zulieferer der ASML-Chain
-    # ── Consumer Tech / Xiaomi ────────────────────────────────────────────────
-    "1810.HK",   # Xiaomi Corp (HK) - Consumer Electronics + EV
-    # ── Europaeische Verteidigung & Aerospace (Sovereignty) ───────────────
-    "RHM.DE",    # Rheinmetall (DE) - Ruestung / Panzer / Munition
-    "AIR.PA",    # Airbus (EU) - Aerospace / Defence / Raumfahrt
-    "LDO.MI",    # Leonardo (IT) - Defence Electronics / Hubschrauber
-    "HO.PA",     # Thales (FR) - Defence Electronics / Cyber / Space
-    "SAF.PA",    # Safran (FR) - Triebwerke / Avionics
-    "RR.L",      # Rolls-Royce Holdings (UK) - Triebwerke / SMR-Reaktoren
-    "HAG.DE",    # Hensoldt AG (DE) - Radarsysteme / Sensors / EW
-    # ── Industrials / Automation / Energie ─────────────────────────────
-    "SIE.DE",    # Siemens AG (DE) - Automatisierung / Digital Industries
-    "ABBN.SW",   # ABB Ltd (CH) - Robotics / Electrification
-    "SU.PA",     # Schneider Electric (FR) - Energiemanagement / IoT
-    "ENR.DE",    # Siemens Energy (DE) - Energiewende / Gasturbinen
-    "VWS.CO",    # Vestas Wind Systems (DK) - Windenergie
+    # Halbleiter & Chip-Equipment
+    "ASML",     "NVDA",     "IFX.DE",   "STM",
+    "BESI.AS",  "SOI.PA",   "AMAT",
+    # Consumer Tech / Xiaomi
+    "1810.HK",
+    # Europaeische Verteidigung & Aerospace
+    "RHM.DE",   "AIR.PA",   "LDO.MI",   "HO.PA",
+    "SAF.PA",   "RR.L",     "HAG.DE",
+    # Industrials / Automation / Energie
+    "SIE.DE",   "ABBN.SW",  "SU.PA",    "ENR.DE",   "VWS.CO",
 ]
 
-# Yahoo Finance Ticker Map (1:1 fuer direkte YF-Ticker als Universe)
-YAHOO_MAP = {ticker: ticker for ticker in UNIVERSE}
+# ─ BREITES SCORE-ONLY UNIVERSE ─────────────────────────────────────────────────
+# Kein thematischer Filter -- rein mechanisches Momentum-Screening.
+# Breite Auswahl globaler Large-/Mid-Caps aus verschiedenen Sektoren.
+# Der Bot rankt diese taeglich ausschliesslich nach Score.
+# Werte die hier oben auftauchen sind unabhaengig von Praeferenzen
+# objektiv die staerksten Momentum-Kandidaten weltweit.
+BROAD_UNIVERSE = [
+    # ── US Mega-Cap Tech
+    "AAPL",   # Apple
+    "MSFT",   # Microsoft
+    "GOOGL",  # Alphabet
+    "META",   # Meta Platforms
+    "AMZN",   # Amazon
+    "TSLA",   # Tesla
+    "NVDA",   # NVIDIA (auch im thematischen, aber hier nochmal)
+    "ORCL",   # Oracle (Cloud/AI)
+    "CRM",    # Salesforce
+    "PLTR",   # Palantir (AI/Data)
+    # ── US Financials
+    "BRK-B",  # Berkshire Hathaway
+    "JPM",    # JPMorgan Chase
+    "GS",     # Goldman Sachs
+    "V",      # Visa
+    "MA",     # Mastercard
+    # ── US Healthcare / Pharma
+    "LLY",    # Eli Lilly (GLP-1 / Adipositas)
+    "NVO",    # Novo Nordisk (Ozempic)
+    "UNH",    # UnitedHealth
+    "ABBV",   # AbbVie
+    # ── US Industrials / Defence
+    "CAT",    # Caterpillar
+    "RTX",    # Raytheon Technologies
+    "LMT",    # Lockheed Martin
+    "NOC",    # Northrop Grumman
+    "GE",     # GE Aerospace
+    # ── US Energy / Commodities
+    "XOM",    # ExxonMobil
+    "CVX",    # Chevron
+    "FCX",    # Freeport-McMoRan (Kupfer)
+    "NEM",    # Newmont (Gold)
+    # ── US Consumer
+    "COST",   # Costco
+    "WMT",    # Walmart
+    "AMGN",   # Amgen
+    # ── Europaeische Blue Chips
+    "MC.PA",  # LVMH (Luxus)
+    "OR.PA",  # L'Oreal
+    "NESN.SW",# Nestle (defensiv)
+    "NOVO-B.CO", # Novo Nordisk DK (Doppelticker)
+    "SAP.DE", # SAP (Enterprise Software)
+    "ALV.DE", # Allianz (Versicherung)
+    # ── Asien / EM
+    "TSM",    # Taiwan Semiconductor (TSMC)
+    "BABA",   # Alibaba (US-listed ADR)
+    "005930.KS", # Samsung Electronics (KRW)
+    "9988.HK",   # Alibaba HK
+    "700.HK",    # Tencent
+]
 
-# Regime-Filter: NASDAQ 100 (tech-lastiger Index, passend zum Universe)
+# Fuer Ticker-Auflosung: beide Universes zusammenfassen
+# YAHOO_MAP bleibt 1:1
+YAHOO_MAP = {ticker: ticker for ticker in UNIVERSE + BROAD_UNIVERSE}
+
+# Regime-Filter: NASDAQ 100
 REGIME_EPIC      = "^NDX"
 REGIME_MA_PERIOD = 200
 
 # ─ SCORING WEIGHTS ───────────────────────────────────────────────────────────
 WEIGHTS = {
-    "mom_3m":  0.25,  # 3-Monats-Momentum
-    "mom_6m":  0.25,  # 6-Monats-Momentum
-    "mom_12m": 0.30,  # 12-Monats-Momentum (Trend-Staerke)
-    "hi52w":   0.20,  # Naehe zum 52-Wochen-Hoch (Staerke-Signal)
+    "mom_3m":  0.25,
+    "mom_6m":  0.25,
+    "mom_12m": 0.30,
+    "hi52w":   0.20,
 }
 
 # ─ BOT PARAMETERS ──────────────────────────────────────────────────────────────
-TOP_N_SIGNALS       = 7     # Top 7 Buy-Signale + Top 7 Exit im Report
-MAX_POSITIONS       = 5     # max. gleichzeitige Positionen
-RISK_PER_TRADE_PCT  = 0.01  # 1% Account-Risiko pro Trade
-STOP_LOSS_PCT       = 0.02  # 2% Stop-Loss
-DAILY_LOSS_LIMIT_PCT= 0.05  # Kill-Switch bei 5% Tagesverlust
+TOP_N_SIGNALS       = 7
+BROAD_TOP_N         = 10   # Top 10 aus dem Score-Only Screening
+MAX_POSITIONS       = 5
+RISK_PER_TRADE_PCT  = 0.01
+STOP_LOSS_PCT       = 0.02
+DAILY_LOSS_LIMIT_PCT= 0.05
 
 # ─ FILE PATHS ───────────────────────────────────────────────────────────────────
 LOG_FILE    = "logs/momentum_bot.log"
