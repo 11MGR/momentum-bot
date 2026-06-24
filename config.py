@@ -21,31 +21,33 @@ if _missing:
     )
 
 # — UNIVERSE ——————————————————————————————————————————————————
-# IG Demo API uses its own Epic format: CS.D.<TICKER>.CASH.IP for shares
-# and IX.D.<INDEX>.IFD.IP for indices.
+# IG Epic format for German accounts:
+#   UC.D.<TICKER>.CASH.IP  = US shares (Germany trading hours)
+#   ED.D.<TICKER>.CASH.IP  = EU/DAX shares (Germany)
+#   IX.D.<INDEX>.IFD.IP    = CFD Indices
 UNIVERSE = [
-    # US Large Caps (IG Cash format)
-    "CS.D.AAPL.CASH.IP",
-    "CS.D.MSFT.CASH.IP",
-    "CS.D.NVDA.CASH.IP",
-    "CS.D.GOOGL.CASH.IP",
-    "CS.D.AMZN.CASH.IP",
-    "CS.D.META.CASH.IP",
-    "CS.D.TSLA.CASH.IP",
-    "CS.D.JPM.CASH.IP",
-    "CS.D.V.CASH.IP",
-    "CS.D.UNH.CASH.IP",
-    "CS.D.XOM.CASH.IP",
-    "CS.D.NFLX.CASH.IP",
-    # EU / DAX Large Caps
-    "CS.D.SAP.CASH.IP",
-    "CS.D.SIE.CASH.IP",
-    "CS.D.ALV.CASH.IP",
-    "CS.D.MBG.CASH.IP",
-    "CS.D.BMW.CASH.IP",
-    "CS.D.BAYN.CASH.IP",
-    "CS.D.DTE.CASH.IP",
-    # Indices
+    # US Large Caps (UC prefix = US shares, German account)
+    "UC.D.AAPL.CASH.IP",
+    "UC.D.MSFT.CASH.IP",
+    "UC.D.NVDA.CASH.IP",
+    "UC.D.GOOGL.CASH.IP",
+    "UC.D.AMZN.CASH.IP",
+    "UC.D.META.CASH.IP",
+    "UC.D.TSLA.CASH.IP",
+    "UC.D.JPM.CASH.IP",
+    "UC.D.V.CASH.IP",
+    "UC.D.UNH.CASH.IP",
+    "UC.D.XOM.CASH.IP",
+    "UC.D.NFLX.CASH.IP",
+    # EU / DAX Large Caps (ED prefix = European shares)
+    "ED.D.SAP.CASH.IP",
+    "ED.D.SIE.CASH.IP",
+    "ED.D.ALV.CASH.IP",
+    "ED.D.MBG.CASH.IP",
+    "ED.D.BMW.CASH.IP",
+    "ED.D.BAYN.CASH.IP",
+    "ED.D.DTE.CASH.IP",
+    # Indices (CFD)
     "IX.D.DAX.IFD.IP",
     "IX.D.SPTRD.IFD.IP",
     "IX.D.NASDAQ.IFD.IP",
@@ -63,11 +65,11 @@ WEIGHT_52W_HIGH = 0.15
 WEIGHT_REL_STR  = 0.10
 
 # — PORTFOLIO SETTINGS ————————————————————————————————————————
-TOP_N_SIGNALS       = 5      # top N buy candidates shown in report
-DAILY_LOSS_LIMIT_PCT = 0.02  # kill-switch: halt if daily loss > 2 %
-MAX_POSITIONS       = 5      # max concurrent open positions
-RISK_PER_TRADE_PCT  = 0.01   # risk 1% of account per trade
-STOP_LOSS_PCT       = 0.02   # stop loss at 2% below entry
+TOP_N_SIGNALS        = 5      # top N buy candidates shown in report
+DAILY_LOSS_LIMIT_PCT = 0.02   # kill-switch: halt if daily loss > 2%
+MAX_POSITIONS        = 5      # max concurrent open positions
+RISK_PER_TRADE_PCT   = 0.01   # risk 1% of account per trade
+STOP_LOSS_PCT        = 0.02   # stop loss at 2% below entry
 
 # — OUTPUT ————————————————————————————————————————————————————
 REPORT_FILE = "reports/daily_report.md"
