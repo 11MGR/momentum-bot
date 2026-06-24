@@ -34,159 +34,119 @@ logging.basicConfig(
 logger = logging.getLogger("main")
 
 
-def get_account_balance(client: IGClient) -> float:
-    try:
-        info = client.get_account_info()
-        for acc in info.get("accounts", []):
-            if acc.get("preferred"):
-                return float(acc["balance"]["available"])
-    except Exception as e:
-        logger.warning(f"Balance nicht abrufbar: {e}")
-    return 0.0
-
-
-def check_daily_loss_limit(client: IGClient) -> bool:
-    try:
-        info = client.get_account_info()
-        for acc in info.get("accounts", []):
-            if acc.get("preferred"):
-                balance = float(acc["balance"]["balance"])
-                deposit = float(acc["balance"]["deposit"])
-                pnl_pct = (balance - deposit) / deposit if deposit else 0
-                if pnl_pct < -DAILY_LOSS_LIMIT_PCT:
-                    logger.error(f"KILL SWITCH: Tagesverlust {pnl_pct:.1%} > Limit {DAILY_LOSS_LIMIT_PCT:.1%}")
-                    return False
-    except Exception as e:
-        logger.warning(f"Loss-Limit-Check fehlgeschlagen: {e}")
-    return True
-
-
-def generate_report(
-    ranked_theme: list,
-    ranked_broad: list,
-    regime_bullish: bool,
-    balance: float,
-    date_str: str,
-) -> str:
-    """Erstellt den dreiteiligen Markdown-Report und schreibt ihn auf Disk."""
-
-    # --- Thematische Signale ---
-    top_buys_theme = [r for r in ranked_theme if r["score"] > 0][:TOP_N_SIGNALS]
-    top_exits_theme = [r for r in reversed(ranked_theme) if r["score"] < 0][:TOP_N_SIGNALS]
-
-    # --- Score-Only Picks (dedupliziert gegen thematisches Universe) ---
-    theme_tickers = {r["epic"] for r in ranked_theme}
-    # Nur Werte zeigen, die NICHT schon im thematischen Universe sind
-    broad_unique = [r for r in ranked_broad if r["epic"] not in theme_tickers]
-    top_broad = [r for r in broad_unique if r["score"] > 0][:BROAD_TOP_N]
-
-    regime_str = "BULLISH" if regime_bullish else "BEARISH"
+def build_table(ranked: list) -> str:
+    """Build a markdown table from a ranked list of (epic, score) tuples."""
     lines = [
-        "# Momentum Bot Daily Report",
-        f"**Datum:** {date_str}  ",
-        f"**Markt-Regime:** {regime_str} (NASDAQ 100 vs. MA{REGIME_MA_PERIOD})  ",
-        f"**Account Balance:** EUR {balance:,.2f}  ",
-        f"**Preisquelle:** Yahoo Finance (yfinance)  ",
-        "",
-        "---",
-        "",
-        "## Thematische Buy-Signale",
-        "> *Dein persoenliches Universe: Halbleiter, EU-Sovereignty, Industrials*",
-        "",
-        "| Rang | Ticker | Score |",
-        "|------|--------|-------|",
+        "| Rank | EPIC | Score |",
+        "|------|------|-------|",
     ]
-    if top_buys_theme:
-        for i, r in enumerate(top_buys_theme, 1):
-            lines.append(f"| {i} | `{r['epic']}` | {r['score']:.4f} |")
-    else:
-        lines.append("| - | Keine Buy-Signale heute | - |")
-
-    lines += [
-        "",
-        "## Score-Only Picks",
-        "> *Rein mechanisches Momentum-Screening aus 40+ globalen Large-Caps --*",
-        "> *kein thematischer Filter, nur der Score entscheidet.*",
-        "> *Werte aus dem thematischen Universe werden hier nicht doppelt gezeigt.*",
-        "",
-        "| Rang | Ticker | Score |",
-        "|------|--------|-------|",
-    ]
-    if top_broad:
-        for i, r in enumerate(top_broad, 1):
-            lines.append(f"| {i} | `{r['epic']}` | {r['score']:.4f} |")
-    else:
-        lines.append("| - | Keine Score-Only-Kandidaten heute | - |")
-
-    lines += [
-        "",
-        "## Exit / Vermeiden",
-        "> *Schwache Werte aus dem thematischen Universe (negativer Score)*",
-        "",
-        "| Rang | Ticker | Score |",
-        "|------|--------|-------|",
-    ]
-    if top_exits_theme:
-        for i, r in enumerate(top_exits_theme, 1):
-            lines.append(f"| {i} | `{r['epic']}` | {r['score']:.4f} |")
-    else:
-        lines.append("| - | Keine Exit-Signale heute | - |")
-
-    lines += [
-        "",
-        "---",
-        "*Automatisch generiert. Immer vor dem Trading verifizieren.*",
-    ]
-
-    report = "\n".join(lines)
-    with open(REPORT_FILE, "w", encoding="utf-8") as f:
-        f.write(report)
-    logger.info(f"Report gespeichert: {REPORT_FILE}")
-    return report
+    for i, (epic, score) in enumerate(ranked, 1):
+        lines.append(f"| {i} | {epic} | {score:.4f} |")
+    return "\n".join(lines)
 
 
 def main():
-    logger.info("=== Momentum Bot startet ===")
-    date_str = datetime.date.today().isoformat()
+    logger.info("=== Momentum Bot starting ===")
 
-    # 1. IG-Login (Account-Info + Kill-Switch)
-    client = IGClient()
+    # --- IG Login ---
+    ig = IGClient()
+    ig.login()
+    balance = ig.get_account_balance()
+    logger.info(f"Account balance: EUR {balance:,.2f}")
 
-    # 2. Kill-Switch
-    if not check_daily_loss_limit(client):
-        logger.error("Tagesverlust-Limit erreicht. Abbruch.")
-        return
+    # --- Market Regime Check ---
+    logger.info("Checking market regime via Yahoo Finance...")
+    bullish = check_regime_yf(REGIME_EPIC, REGIME_MA_PERIOD)
+    regime_label = "BULLISH" if bullish else "BEARISH"
+    logger.info(f"Market regime: {regime_label}")
 
-    balance = get_account_balance(client)
-    logger.info(f"Account Balance: EUR {balance:,.2f}")
+    # --- Fetch prices for THEMATIC UNIVERSE ---
+    logger.info("Fetching price data for universe via Yahoo Finance...")
+    prices = fetch_all_prices_yf(UNIVERSE)
+    logger.info(f"Price data fetched for {len(prices)}/{len(UNIVERSE)} instruments.")
 
-    # 3. Markt-Regime via Yahoo Finance
-    logger.info("Pruefe Markt-Regime via Yahoo Finance...")
-    regime_bullish = check_regime_yf(regime_epic=REGIME_EPIC, ma_period=REGIME_MA_PERIOD)
-    logger.info(f"Markt-Regime: {'BULLISH' if regime_bullish else 'BEARISH'}")
+    # --- Score THEMATIC UNIVERSE ---
+    logger.info("Scoring universe...")
+    ranked_all = rank_universe(prices)
 
-    # 4a. Thematisches Universe fetchen & scoren
-    logger.info(f"Lade Preise fuer thematisches Universe ({len(UNIVERSE)} Werte)...")
-    price_map_theme = fetch_all_prices_yf(UNIVERSE, num_points=260)
-    logger.info(f"Thematisch: {len(price_map_theme)}/{len(UNIVERSE)} Werte mit Daten")
+    # Top buy signals (positive score, up to TOP_N_SIGNALS)
+    top_signals = [(e, s) for e, s in ranked_all if s > 0][:TOP_N_SIGNALS]
+    # Exit / Avoid signals (negative score)
+    exit_signals = [(e, s) for e, s in ranked_all if s < 0]
 
-    # 4b. Breites Score-Only Universe fetchen & scoren
-    logger.info(f"Lade Preise fuer Score-Only Universe ({len(BROAD_UNIVERSE)} Werte)...")
-    price_map_broad = fetch_all_prices_yf(BROAD_UNIVERSE, num_points=260)
-    logger.info(f"Score-Only: {len(price_map_broad)}/{len(BROAD_UNIVERSE)} Werte mit Daten")
+    # --- Fetch prices for BROAD_UNIVERSE (Score-Only) ---
+    logger.info("Fetching price data for BROAD_UNIVERSE via Yahoo Finance...")
+    broad_prices = fetch_all_prices_yf(BROAD_UNIVERSE)
+    logger.info(f"Broad price data fetched for {len(broad_prices)}/{len(BROAD_UNIVERSE)} instruments.")
 
-    # Benchmark (S&P 500 / NASDAQ) fuer Relative-Strength
-    benchmark_prices = get_prices_yf(REGIME_EPIC, num_points=260)
+    # --- Score BROAD_UNIVERSE ---
+    logger.info("Scoring BROAD_UNIVERSE...")
+    broad_ranked_all = rank_universe(broad_prices)
+    # Take top BROAD_TOP_N with positive score
+    broad_top = [(e, s) for e, s in broad_ranked_all if s > 0][:BROAD_TOP_N]
 
-    # 5. Ranken
-    logger.info("Scoren & Ranken...")
-    ranked_theme = rank_universe(UNIVERSE, price_map_theme, benchmark_prices)
-    ranked_broad = rank_universe(BROAD_UNIVERSE, price_map_broad, benchmark_prices)
+    # --- Build Report ---
+    today = datetime.date.today().isoformat()
+    report_lines = [
+        "# Momentum Bot Daily Report",
+        f"**Date:** {today}",
+        f"**Market Regime:** {regime_label}",
+        f"**Account Balance:** EUR {balance:,.2f}",
+        "**Price Source:** Yahoo Finance (yfinance)",
+        "",
+        "---",
+        "",
+        "## 1. Thematisches Universe - Top Buy Signals",
+        "",
+    ]
+    if top_signals:
+        report_lines.append(build_table(top_signals))
+    else:
+        report_lines.append("_Keine Buy-Signale (Regime BEARISH oder alle Scores negativ)_")
 
-    # 6. Report
-    report = generate_report(ranked_theme, ranked_broad, regime_bullish, balance, date_str)
-    print("\n" + report)
-    logger.info("=== Momentum Bot abgeschlossen ===")
+    report_lines += [
+        "",
+        "---",
+        "",
+        "## 2. Score-Only Screening (Breites Universe - unabhaengig von Praeferenzen)",
+        "",
+        f"_Top {BROAD_TOP_N} globale Large-Caps nach reinem Momentum-Score:_",
+        "",
+    ]
+    if broad_top:
+        report_lines.append(build_table(broad_top))
+    else:
+        report_lines.append("_Keine Score-Only-Signale verfuegbar._")
+
+    report_lines += [
+        "",
+        "---",
+        "",
+        "## 3. Exit / Avoid Signals (Thematisches Universe)",
+        "",
+    ]
+    if exit_signals:
+        report_lines.append(build_table(exit_signals))
+    else:
+        report_lines.append("_Keine Exit-Signale._")
+
+    report_lines += [
+        "",
+        "---",
+        "*This report is generated automatically. Always verify before trading.*",
+    ]
+
+    report = "\n".join(report_lines)
+
+    # --- Save Report ---
+    with open(REPORT_FILE, "w") as f:
+        f.write(report)
+    logger.info(f"Report saved to {REPORT_FILE}")
+
+    # --- Print Report to Logs ---
+    print(report)
+
+    logger.info("=== Momentum Bot finished ===")
 
 
 if __name__ == "__main__":
