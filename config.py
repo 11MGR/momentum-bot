@@ -66,6 +66,8 @@ WEIGHT_REL_STR  = 0.10
 TOP_N_SIGNALS       = 5      # top N buy candidates shown in report
 DAILY_LOSS_LIMIT_PCT = 0.02  # kill-switch: halt if daily loss > 2 %
 MAX_POSITIONS       = 5      # max concurrent open positions
+RISK_PER_TRADE_PCT  = 0.01   # risk 1% of account per trade
+STOP_LOSS_PCT       = 0.02   # stop loss at 2% below entry
 
 # — OUTPUT ————————————————————————————————————————————————————
 REPORT_FILE = "reports/daily_report.md"
