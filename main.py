@@ -45,12 +45,26 @@ def build_table(ranked: list) -> str:
     return "\n".join(lines)
 
 
+def get_balance(ig: IGClient) -> float:
+    """Extract available balance from account info."""
+    try:
+        info = ig.get_account_info()
+        # IG accounts endpoint returns {"accounts": [{"balance": {"available": ...}}]}
+        accounts = info.get("accounts", [])
+        if accounts:
+            return float(accounts[0].get("balance", {}).get("available", 0))
+        return 0.0
+    except Exception as e:
+        logger.warning(f"Could not fetch balance: {e}")
+        return 0.0
+
+
 def main():
     logger.info("=== Momentum Bot starting ===")
 
     # --- IG Login (auto-login happens in IGClient.__init__) ---
     ig = IGClient()
-    balance = ig.get_account_balance()
+    balance = get_balance(ig)
     logger.info(f"Account balance: EUR {balance:,.2f}")
 
     # --- Market Regime Check ---
