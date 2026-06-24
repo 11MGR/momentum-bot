@@ -8,7 +8,6 @@ IG_ACC_TYPE   = os.getenv("IG_ACC_TYPE", "DEMO") # DEMO | LIVE
 IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")       # required
 IG_BASE_URL   = "https://demo-api.ig.com/gateway/deal"
 
-# Validate that required env vars are set
 _required = {"IG_API_KEY": IG_API_KEY, "IG_USERNAME": IG_USERNAME,
              "IG_PASSWORD": IG_PASSWORD, "IG_ACC_NUMBER": IG_ACC_NUMBER}
 _missing = [k for k, v in _required.items() if not v]
@@ -18,70 +17,74 @@ if _missing:
         "Set them in Railway > Variables (never hardcode credentials)."
     )
 
-# ─ UNIVERSE ─────────────────────────────────────────────────────────────
-# IG epics used for order placement on the demo account.
-# Price history is fetched via Yahoo Finance (yfinance) - see YAHOO_MAP below.
+# ─ UNIVERSE ───────────────────────────────────────────────────────────────────
+#
+# Thematisches Universe: Tech / Halbleiter / Europaeische Sovereignty-Plays
+#
+# Fokus:
+#   - Halbleiter & Chip-Equipment (ASML, Infineon, STMicro, BE Semi, Soitec)
+#   - Consumer Tech / Xiaomi (HK-listed)
+#   - Europaeische Verteidigung & Aerospace (Rheinmetall, Airbus, Leonardo,
+#     Thales, Safran, Rolls-Royce) -- Abloese US/CN-Abhaengigkeit
+#   - Industrials / Automation (Siemens, ABB, Schneider Electric, Siemens Energy)
+#   - Regime-Filter bleibt NASDAQ 100 (technologie-lastig)
+#
+# WICHTIG: Diese Werte sind KEINE IG-Epics fuer echte Orders --
+#   sie dienen ausschliesslich der Momentum-Berechnung via Yahoo Finance.
+#   Fuer echte IG-Orders muessen die passenden IG-Epics separat gepflegt werden.
+#   Das UNIVERSE-Feld enthaelt hier die Yahoo-Finance-Ticker direkt.
+
 UNIVERSE = [
-    # Global Equity Indices
-    "IX.D.DAX.IFD.IP",     # Germany DAX 40
-    "IX.D.SPTRD.IFD.IP",   # US S&P 500
-    "IX.D.NASDAQ.IFD.IP",  # US NASDAQ 100
-    "IX.D.DOW.IFD.IP",     # US Dow Jones
-    "IX.D.FTSE.IFD.IP",    # UK FTSE 100
-    "IX.D.ESXB.IFD.IP",    # Euro Stoxx 50
-    "IX.D.NIKKEI.IFD.IP",  # Japan Nikkei 225
-    # FX Majors
-    "CS.D.EURUSD.CFD.IP",  # EUR/USD
-    "CS.D.GBPUSD.CFD.IP",  # GBP/USD
-    "CS.D.USDJPY.CFD.IP",  # USD/JPY
-    "CS.D.AUDUSD.CFD.IP",  # AUD/USD
-    "CS.D.USDCHF.CFD.IP",  # USD/CHF
-    # Commodities
-    "CS.D.CFDGOLD.CFD.IP", # Gold
-    "CS.D.CFDSIVER.CFD.IP",# Silver
-    "CC.D.CL.UNC.IP",      # Crude Oil WTI
-    "CC.D.NG.UNC.IP",      # Natural Gas
+    # ── Halbleiter & Chip-Equipment ─────────────────────────────────────────────
+    "ASML",          # ASML Holding - weltweiter EUV-Monopolist
+    "IFX.DE",        # Infineon Technologies - DE, Automotive + Power Chips
+    "STM",           # STMicroelectronics - EU, Mixed-Signal / Automotive
+    "BESI.AS",       # BE Semiconductor Industries - NL, Packaging Equipment
+    "SOI.PA",        # Soitec - FR, Silicon-on-Insulator Wafer
+    "AMAT",          # Applied Materials - US, aber Kern-Zulieferer ASML-Chain
+    # ── Consumer Tech / Xiaomi ────────────────────────────────────────────────
+    "1810.HK",       # Xiaomi Corp - HK-listed, EV + Consumer Electronics
+    # ── Europaeische Verteidigung & Aerospace (Sovereignty) ───────────────
+    "RHM.DE",        # Rheinmetall - DE, Ruestung / Fahrzeuge
+    "AIR.PA",        # Airbus - EU, Aerospace / Defence
+    "LDO.MI",        # Leonardo - IT, Defence Electronics & Helicopters
+    "HO.PA",         # Thales - FR, Defence Electronics / Cyber / Space
+    "SAF.PA",        # Safran - FR, Triebwerke / Avionics
+    "RR.L",          # Rolls-Royce Holdings - UK, Triebwerke / Micro-Reaktoren
+    "BAYN.DE",       # Hensoldt - nein, lieber: DHER.DE (Diehl) -- nicht verfuegbar
+    "HENSOLDT.DE",   # Hensoldt AG - DE, Radarsysteme
+    # ── Industrials / Automation / Energie ─────────────────────────────
+    "SIE.DE",        # Siemens AG - DE, Automatisierung / Digital Industries
+    "ABBN.SW",       # ABB Ltd - CH, Robotics / Electrification
+    "SU.PA",         # Schneider Electric - FR, Energiemanagement / IoT
+    "ENR.DE",        # Siemens Energy - DE, Energiewende
+    "VWS.CO",        # Vestas Wind - DK, Windenergie
 ]
 
-# Yahoo Finance ticker map: IG epic -> yfinance symbol
-# Used for momentum scoring (price history). IG is used for order placement only.
-YAHOO_MAP = {
-    "IX.D.DAX.IFD.IP":     "^GDAXI",   # DAX 40
-    "IX.D.SPTRD.IFD.IP":   "^GSPC",    # S&P 500
-    "IX.D.NASDAQ.IFD.IP":  "^NDX",     # NASDAQ 100
-    "IX.D.DOW.IFD.IP":     "^DJI",     # Dow Jones
-    "IX.D.FTSE.IFD.IP":    "^FTSE",    # FTSE 100
-    "IX.D.ESXB.IFD.IP":    "^STOXX50E",# Euro Stoxx 50
-    "IX.D.NIKKEI.IFD.IP":  "^N225",    # Nikkei 225
-    "CS.D.EURUSD.CFD.IP":  "EURUSD=X", # EUR/USD
-    "CS.D.GBPUSD.CFD.IP":  "GBPUSD=X", # GBP/USD
-    "CS.D.USDJPY.CFD.IP":  "USDJPY=X", # USD/JPY
-    "CS.D.AUDUSD.CFD.IP":  "AUDUSD=X", # AUD/USD
-    "CS.D.USDCHF.CFD.IP":  "USDCHF=X", # USD/CHF
-    "CS.D.CFDGOLD.CFD.IP": "GC=F",     # Gold Futures
-    "CS.D.CFDSIVER.CFD.IP":"SI=F",     # Silver Futures
-    "CC.D.CL.UNC.IP":      "CL=F",     # WTI Crude Oil
-    "CC.D.NG.UNC.IP":      "NG=F",     # Natural Gas
-}
+# Yahoo Finance Ticker Map
+# Da wir hier direkt YF-Ticker als UNIVERSE verwenden, ist die Map 1:1
+YAHOO_MAP = {ticker: ticker for ticker in UNIVERSE}
+# Korrekturen fuer Sonderzeichen / Abweichungen:
+YAHOO_MAP["HENSOLDT.DE"] = "HAG.DE"  # Hensoldt AG an der XETRA
 
-# Epic used for market-regime filter (S&P 500 200-day MA)
-REGIME_EPIC      = "IX.D.SPTRD.IFD.IP"
+# Epic fuer Regime-Filter: NASDAQ 100 (tech-lastig, passt zum Universe)
+REGIME_EPIC      = "^NDX"
 REGIME_MA_PERIOD = 200
 
 # ─ SCORING WEIGHTS ───────────────────────────────────────────────────────────
 WEIGHTS = {
-    "mom_3m":  0.25,  # 3-month momentum
-    "mom_6m":  0.25,  # 6-month momentum
-    "mom_12m": 0.30,  # 12-month momentum
-    "hi52w":   0.20,  # proximity to 52-week high
+    "mom_3m":  0.25,  # 3-Monats-Momentum
+    "mom_6m":  0.25,  # 6-Monats-Momentum
+    "mom_12m": 0.30,  # 12-Monats-Momentum
+    "hi52w":   0.20,  # Naehe zum 52-Wochen-Hoch
 }
 
 # ─ BOT PARAMETERS ──────────────────────────────────────────────────────────────
-TOP_N_SIGNALS       = 5     # how many top/bottom signals to show in report
-MAX_POSITIONS       = 5     # max concurrent positions
-RISK_PER_TRADE_PCT  = 0.01  # 1% account risk per trade
-STOP_LOSS_PCT       = 0.02  # 2% stop loss per trade
-DAILY_LOSS_LIMIT_PCT= 0.05  # halt if daily drawdown exceeds 5%
+TOP_N_SIGNALS       = 7     # Top 7 Buy + Top 7 Exit im Report
+MAX_POSITIONS       = 5     # max. gleichzeitige Positionen
+RISK_PER_TRADE_PCT  = 0.01  # 1% Account-Risiko pro Trade
+STOP_LOSS_PCT       = 0.02  # 2% Stop-Loss
+DAILY_LOSS_LIMIT_PCT= 0.05  # Kill-Switch bei 5% Tagesverlust
 
 # ─ FILE PATHS ───────────────────────────────────────────────────────────────────
 LOG_FILE    = "logs/momentum_bot.log"
