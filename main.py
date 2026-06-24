@@ -159,6 +159,11 @@ def main():
     with open(REPORT_FILE, "w") as f:
         f.write(report)
     logger.info(f"Report saved to {REPORT_FILE}")
+       # --- Dashboard Report (docs/report.md fuer GitHub Pages) ---
+    Path("docs").mkdir(exist_ok=True)
+    with open("docs/report.md", "w") as f:
+        f.write(report)
+    logger.info("Dashboard report saved to docs/report.md")
 
     # --- Print Report to Logs ---
     print(report)
