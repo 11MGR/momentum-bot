@@ -48,9 +48,8 @@ def build_table(ranked: list) -> str:
 def main():
     logger.info("=== Momentum Bot starting ===")
 
-    # --- IG Login ---
+    # --- IG Login (auto-login happens in IGClient.__init__) ---
     ig = IGClient()
-    ig.login()
     balance = ig.get_account_balance()
     logger.info(f"Account balance: EUR {balance:,.2f}")
 
