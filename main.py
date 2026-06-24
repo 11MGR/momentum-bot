@@ -4,14 +4,16 @@ Run once per day after market close:
     python main.py
 
 The script:
-1. Logs into IG demo account
-2. Checks market regime (S&P 500 trend)
-3. Fetches daily price history for the full universe
-4. Scores and ranks all instruments
+1. Logs into IG demo account (account info + kill-switch via IG API)
+2. Checks market regime via Yahoo Finance (S&P 500 200-day MA)
+3. Fetches 260 days of daily price history via Yahoo Finance
+4. Scores and ranks all instruments by momentum
 5. Generates a daily Markdown report with top buy signals and exit warnings
 6. (Optional) Places paper orders on IG demo for the top N signals
-"""
 
+Note: IG Demo API does not serve historical prices via /prices endpoint.
+All price history is fetched from Yahoo Finance (yfinance) instead.
+"""
 import os
 import logging
 import datetime
@@ -24,6 +26,7 @@ from config import (
     DAILY_LOSS_LIMIT_PCT,
 )
 from ig_client import IGClient
+from price_fetcher import fetch_all_prices_yf, check_regime_yf
 from scorer import rank_universe
 
 # ── Logging setup ────────────────────────────────────────────────────────────
@@ -40,38 +43,8 @@ logging.basicConfig(
 logger = logging.getLogger("main")
 
 
-def check_regime(client: IGClient) -> bool:
-    """Return True if market regime is bullish (price > MA)."""
-    prices = client.get_prices(REGIME_EPIC, resolution="DAY", num_points=REGIME_MA_PERIOD + 10)
-    if not prices:
-        logger.warning("Could not fetch regime data. Assuming bearish.")
-        return False
-    closes = [(p["closePrice"]["bid"] + p["closePrice"]["ask"]) / 2 for p in prices
-              if p.get("closePrice")]
-    if len(closes) < REGIME_MA_PERIOD:
-        return False
-    ma = sum(closes[-REGIME_MA_PERIOD:]) / REGIME_MA_PERIOD
-    current = closes[-1]
-    bullish = current > ma
-    logger.info(f"Regime check: price={current:.2f}, MA{REGIME_MA_PERIOD}={ma:.2f}, bullish={bullish}")
-    return bullish
-
-
-def fetch_all_prices(client: IGClient) -> dict:
-    """Fetch 260 days of daily prices for every epic in universe."""
-    price_map = {}
-    for epic in UNIVERSE:
-        prices = client.get_prices(epic, resolution="DAY", num_points=260)
-        if prices:
-            price_map[epic] = prices
-            logger.info(f"  {epic}: {len(prices)} bars")
-        else:
-            logger.warning(f"  {epic}: no data")
-    return price_map
-
-
 def get_account_balance(client: IGClient) -> float:
-    """Return available cash balance."""
+    """Return available cash balance from IG demo account."""
     try:
         info = client.get_account_info()
         for acc in info.get("accounts", []):
@@ -88,34 +61,43 @@ def check_daily_loss_limit(client: IGClient) -> bool:
         info = client.get_account_info()
         for acc in info.get("accounts", []):
             if acc.get("preferred"):
-                balance    = float(acc["balance"]["balance"])
-                deposit    = float(acc["balance"]["deposit"])
-                pnl_pct    = (balance - deposit) / deposit if deposit else 0
+                balance = float(acc["balance"]["balance"])
+                deposit = float(acc["balance"]["deposit"])
+                pnl_pct = (balance - deposit) / deposit if deposit else 0
                 if pnl_pct < -DAILY_LOSS_LIMIT_PCT:
-                    logger.error(f"KILL SWITCH: daily loss {pnl_pct:.1%} exceeds limit {DAILY_LOSS_LIMIT_PCT:.1%}")
+                    logger.error(
+                        f"KILL SWITCH: daily loss {pnl_pct:.1%} exceeds "
+                        f"limit {DAILY_LOSS_LIMIT_PCT:.1%}"
+                    )
                     return False
     except Exception as e:
         logger.warning(f"Loss-limit check failed: {e}")
     return True
 
 
-def generate_report(ranked: list, regime_bullish: bool, balance: float, date_str: str) -> str:
+def generate_report(
+    ranked: list, regime_bullish: bool, balance: float, date_str: str
+) -> str:
     """Build a Markdown report and write it to disk."""
-    top_buys  = [r for r in ranked if r["score"] > 0][:TOP_N_SIGNALS]
+    top_buys = [r for r in ranked if r["score"] > 0][:TOP_N_SIGNALS]
     top_exits = [r for r in reversed(ranked) if r["score"] < 0][:TOP_N_SIGNALS]
 
     lines = [
-        f"# Momentum Bot Daily Report",
+        "# Momentum Bot Daily Report",
         f"**Date:** {date_str}  ",
         f"**Market Regime:** {'BULLISH' if regime_bullish else 'BEARISH'}  ",
         f"**Account Balance:** EUR {balance:,.2f}  ",
+        f"**Price Source:** Yahoo Finance (yfinance)  ",
         "",
         "## Top Buy Signals",
         "| Rank | EPIC | Score |",
         "|------|------|-------|",
     ]
-    for i, r in enumerate(top_buys, 1):
-        lines.append(f"| {i} | {r['epic']} | {r['score']:.4f} |")
+    if top_buys:
+        for i, r in enumerate(top_buys, 1):
+            lines.append(f"| {i} | {r['epic']} | {r['score']:.4f} |")
+    else:
+        lines.append("| - | No buy signals today | - |")
 
     lines += [
         "",
@@ -123,15 +105,17 @@ def generate_report(ranked: list, regime_bullish: bool, balance: float, date_str
         "| Rank | EPIC | Score |",
         "|------|------|-------|",
     ]
-    for i, r in enumerate(top_exits, 1):
-        lines.append(f"| {i} | {r['epic']} | {r['score']:.4f} |")
+    if top_exits:
+        for i, r in enumerate(top_exits, 1):
+            lines.append(f"| {i} | {r['epic']} | {r['score']:.4f} |")
+    else:
+        lines.append("| - | No exit signals today | - |")
 
     lines += [
         "",
         "---",
         "*This report is generated automatically. Always verify before trading.*",
     ]
-
     report = "\n".join(lines)
     with open(REPORT_FILE, "w", encoding="utf-8") as f:
         f.write(report)
@@ -143,7 +127,7 @@ def main():
     logger.info("=== Momentum Bot starting ===")
     date_str = datetime.date.today().isoformat()
 
-    # 1. Connect
+    # 1. Connect to IG (for account info + kill-switch + future order placement)
     client = IGClient()
 
     # 2. Kill switch check
@@ -154,13 +138,21 @@ def main():
     balance = get_account_balance(client)
     logger.info(f"Account balance: EUR {balance:,.2f}")
 
-    # 3. Regime filter
-    regime_bullish = check_regime(client)
+    # 3. Market regime filter via Yahoo Finance
+    logger.info("Checking market regime via Yahoo Finance...")
+    regime_bullish = check_regime_yf(
+        regime_epic=REGIME_EPIC, ma_period=REGIME_MA_PERIOD
+    )
+    logger.info(f"Market regime: {'BULLISH' if regime_bullish else 'BEARISH'}")
 
-    # 4. Fetch prices
-    logger.info("Fetching price data for universe...")
-    benchmark_prices = client.get_prices(REGIME_EPIC, resolution="DAY", num_points=260)
-    price_map = fetch_all_prices(client)
+    # 4. Fetch price history via Yahoo Finance
+    logger.info("Fetching price data for universe via Yahoo Finance...")
+    price_map = fetch_all_prices_yf(UNIVERSE, num_points=260)
+    logger.info(f"Price data fetched for {len(price_map)}/{len(UNIVERSE)} instruments.")
+
+    # Also fetch benchmark for scorer (S&P 500)
+    from price_fetcher import get_prices_yf
+    benchmark_prices = get_prices_yf(REGIME_EPIC, num_points=260)
 
     # 5. Score & rank
     logger.info("Scoring universe...")
@@ -169,7 +161,6 @@ def main():
     # 6. Report
     report = generate_report(ranked, regime_bullish, balance, date_str)
     print("\n" + report)
-
     logger.info("=== Momentum Bot finished ===")
 
 
