@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Momentum Bot Dashboard</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --blue: #58a6ff;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .header {
+      max-width: 900px;
+      margin: 0 auto 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header h1 span { font-size: 1.6rem; }
+    .meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: right;
+      line-height: 1.6;
+    }
+    .regime-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .bullish { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid var(--green); }
+    .bearish { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid var(--red); }
+    .grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .card.full { grid-column: 1 / -1; }
+    .card h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th {
+      text-align: left;
+      padding: 8px 10px;
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.78rem;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(48,54,61,0.5);
+    }
+    tr:last-child td { border-bottom: none; }
+    .rank {
+      color: var(--muted);
+      font-size: 0.8rem;
+      width: 32px;
+    }
+    .epic { font-weight: 600; font-family: monospace; color: var(--blue); }
+    .score-pos { color: var(--green); font-weight: 700; font-family: monospace; }
+    .score-neg { color: var(--red); font-weight: 700; font-family: monospace; }
+    .bar-wrap {
+      width: 80px;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .bar-fill { height: 100%; border-radius: 3px; }
+    .stat-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .stat {
+      background: rgba(88,166,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 18px;
+      flex: 1;
+      min-width: 120px;
+    }
+    .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .stat-value { font-size: 1.15rem; font-weight: 700; }
+    .footer {
+      max-width: 900px;
+      margin: 28px auto 0;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    #loading { text-align: center; padding: 60px; color: var(--muted); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>&#x1F4C8;</span> Momentum Bot Dashboard</h1>
+  <div class="meta" id="meta-info">Lade Daten...</div>
+</div>
+
+<div id="loading">&#x23F3; Report wird geladen...</div>
+<div id="dashboard" style="display:none">
+  <div class="stat-row" style="max-width:900px;margin:0 auto 20px;">
+    <div class="stat">
+      <div class="stat-label">Datum</div>
+      <div class="stat-value" id="s-date">-</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Markt-Regime</div>
+      <div class="stat-value" id="s-regime">-</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Balance (Demo)</div>
+      <div class="stat-value" id="s-balance">-</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Preisquelle</div>
+      <div class="stat-value" style="font-size:0.9rem" id="s-source">-</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>&#x1F7E2; Thematisch &mdash; Top Buy Signals</h2>
+      <table><thead><tr><th>#</th><th>EPIC</th><th>Score</th><th>St&auml;rke</th></tr></thead>
+      <tbody id="t-buy"></tbody></table>
+    </div>
+    <div class="card">
+      <h2>&#x1F534; Exit / Avoid</h2>
+      <table><thead><tr><th>#</th><th>EPIC</th><th>Score</th><th>Schw&auml;che</th></tr></thead>
+      <tbody id="t-exit"></tbody></table>
+    </div>
+    <div class="card full">
+      <h2>&#x1F310; Score-Only Screening &mdash; Globale Large-Caps</h2>
+      <table><thead><tr><th>#</th><th>EPIC</th><th>Score</th><th>St&auml;rke</th></tr></thead>
+      <tbody id="t-broad"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Automatisch generiert &bull; Quellcode privat &bull; Nur Demo-Konto &bull; Kein Anlageberatung
+</div>
+
+<script>
+async function loadReport() {
+  try {
+    const res = await fetch('report.md?nocache=' + Date.now());
+    if (!res.ok) throw new Error('Nicht gefunden');
+    const md = await res.text();
+    parseAndRender(md);
+  } catch(e) {
+    document.getElementById('loading').innerHTML =
+      '<span style="color:#f85149">&#x26A0; Report nicht gefunden. Bitte nach dem naechsten Bot-Run neu laden.</span>';
+  }
+}
+
+function parseAndRender(md) {
+  const lines = md.split('\n');
+
+  // Meta
+  const date    = (lines.find(l => l.startsWith('**Date:**')) || '').replace('**Date:**','').trim();
+  const regime  = (lines.find(l => l.startsWith('**Market Regime:**')) || '').replace('**Market Regime:**','').trim();
+  const balance = (lines.find(l => l.startsWith('**Account Balance:**')) || '').replace('**Account Balance:**','').trim();
+  const source  = (lines.find(l => l.startsWith('**Price Source:**')) || '').replace('**Price Source:**','').trim();
+
+  document.getElementById('s-date').textContent    = date || '-';
+  document.getElementById('s-balance').textContent = balance || '-';
+  document.getElementById('s-source').textContent  = source || '-';
+
+  const regEl = document.getElementById('s-regime');
+  if (regime) {
+    const badge = document.createElement('span');
+    badge.className = 'regime-badge ' + (regime === 'BULLISH' ? 'bullish' : 'bearish');
+    badge.textContent = regime;
+    regEl.appendChild(badge);
+  }
+
+  document.getElementById('meta-info').innerHTML =
+    'Letzter Update: ' + (date || '?') + '<br>Quelle: Yahoo Finance (yfinance)';
+
+  // Sections
+  let section = null;
+  const sections = { buy: [], broad: [], exit: [] };
+
+  for (const line of lines) {
+    if (line.includes('1. Thematisches Universe')) { section = 'buy'; continue; }
+    if (line.includes('2. Score-Only')) { section = 'broad'; continue; }
+    if (line.includes('3. Exit')) { section = 'exit'; continue; }
+    if (!section) continue;
+    const m = line.match(/^\|\s*(\d+)\s*\|\s*([\w.\-:]+)\s*\|\s*([\d.\-]+)\s*\|/);
+    if (m) sections[section].push({ rank: m[1], epic: m[2], score: parseFloat(m[3]) });
+  }
+
+  // Max scores for bar scaling
+  const maxBuy   = Math.max(...sections.buy.map(r => Math.abs(r.score)), 0.01);
+  const maxBroad = Math.max(...sections.broad.map(r => Math.abs(r.score)), 0.01);
+  const maxExit  = Math.max(...sections.exit.map(r => Math.abs(r.score)), 0.01);
+
+  function rows(data, tbodyId, maxVal, neg) {
+    const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = '';
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center">Keine Signale</td></tr>';
+      return;
+    }
+    for (const r of data) {
+      const pct = Math.min(100, Math.round(Math.abs(r.score) / maxVal * 100));
+      const color = neg ? 'var(--red)' : 'var(--green)';
+      const scoreClass = neg ? 'score-neg' : 'score-pos';
+      tbody.innerHTML += `<tr>
+        <td class="rank">${r.rank}</td>
+        <td class="epic">${r.epic}</td>
+        <td class="${scoreClass}">${r.score.toFixed(4)}</td>
+        <td><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div></td>
+      </tr>`;
+    }
+  }
+
+  rows(sections.buy,   't-buy',   maxBuy,   false);
+  rows(sections.broad, 't-broad', maxBroad, false);
+  rows(sections.exit,  't-exit',  maxExit,  true);
+
+  document.getElementById('loading').style.display   = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+}
+
+loadReport();
+</script>
+</body>
+</html>
