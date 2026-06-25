@@ -239,6 +239,7 @@ document.getElementById('meta-info').innerHTML =
 let section = null;
 const sections = { buy: [], broad: [], exit: [] };
 
+<<<<<<< HEAD
 for (const line of lines) {
         if (line.includes('Exit') || line.includes('Avoid')) { section = 'exit'; continue; }
         if (line.includes('Score-Only') || line.includes('Breites')) { section = 'broad'; continue; } if (line.includes('Exit') || line.includes('Avoid')) { section = 'exit'; continue; }
@@ -248,6 +249,16 @@ if (!section) continue;
 const m = line.match(/^\|\s*(\d+)\s*\|\s*([\w.\-:]+)\s*\|\s*([\d.\-]+)\s*\|/);
 if (m) sections[section].push({ rank: m[1], epic: m[2], score: parseFloat(m[3]) });
 }
+=======
+  for (const line of lines) {
+        if (line.includes('Exit') || line.includes('Avoid')) { section = 'exit'; continue; }
+            if (line.includes('Top Buy') || (line.includes('Thematisches') && !line.includes('Exit') && !line.includes('Avoid'))) { section = 'buy'; continue; }
+    if (line.includes('Exit')) { section = 'exit'; continue; }
+    if (!section) continue;
+    const m = line.match(/^\|\s*(\d+)\s*\|\s*([\w.\-:]+)\s*\|\s*([\d.\-]+)\s*\|/);
+    if (m) sections[section].push({ rank: m[1], epic: m[2], score: parseFloat(m[3]) });
+  }
+>>>>>>> parent of d5628d1 (fix: add missing NAMES entries and broad section detection)
 
 // Max scores for bar scaling
 const maxBuy   = Math.max(...sections.buy.map(r => Math.abs(r.score)), 0.01);
@@ -255,6 +266,7 @@ const maxBroad = Math.max(...sections.broad.map(r => Math.abs(r.score)), 0.01);
 const maxExit  = Math.max(...sections.exit.map(r => Math.abs(r.score)), 0.01);
 
   const NAMES={NVDA:'Nvidia',TSLA:'Tesla',AAPL:'Apple',MSFT:'Microsoft',AMZN:'Amazon',GOOGL:'Alphabet',META:'Meta',ASML:'ASML',AMD:'AMD',INTC:'Intel',QCOM:'Qualcomm',MU:'Micron',AMAT:'Appl. Materials',KLAC:'KLA Corp',LRCX:'Lam Research',STM:'STMicroelectronics',TXN:'Texas Instruments',AVGO:'Broadcom',ARM:'Arm Holdings',V:'Visa',MA:'Mastercard',JPM:'JPMorgan',BAC:'Bank of America',GS:'Goldman Sachs',BLK:'BlackRock',NOVO_B:'Novo Nordisk',SAN:'Sanofi',ROG:'Roche',AZN:'AstraZeneca',NOVN:'Novartis',NVO:'Novo Nordisk ADR',PFE:'Pfizer',BABA:'Alibaba',TSM:'TSMC',SE:'Sea Ltd',JD:'JD.com',BA:'Boeing',DIS:'Walt Disney',NFLX:'Netflix',SPOT:'Spotify',ADBE:'Adobe',CRM:'Salesforce',ORCL:'Oracle',SAP:'SAP',ULVR:'Unilever',DTE:'Deutsche Telekom',SIE:'Siemens',DPW:'Deutsche Post',RWE:'RWE','SOI.PA':'Soitec','AIR.PA':'Airbus','MC.PA':'LVMH','TTE.PA':'TotalEnergies','SU.PA':'Schneider El.'}; function rows(data, tbodyId, maxVal, neg) {
+<<<<<<< HEAD
   const NAMES={NVDA:'Nvidia',TSLA:'Tesla',AAPL:'Apple',MSFT:'Microsoft',AMZN:'Amazon',GOOGL:'Alphabet',META:'Meta',ASML:'ASML',AMD:'AMD',INTC:'Intel',QCOM:'Qualcomm',MU:'Micron',AMAT:'Appl. Materials',KLAC:'KLA Corp',LRCX:'Lam Research',STM:'STMicroelectronics',TXN:'Texas Instruments',AVGO:'Broadcom',ARM:'Arm Holdings',V:'Visa',MA:'Mastercard',JPM:'JPMorgan',BAC:'Bank of America',GS:'Goldman Sachs',BLK:'BlackRock',NOVO_B:'Novo Nordisk',SAN:'Sanofi',ROG:'Roche',AZN:'AstraZeneca',NOVN:'Novartis',NVO:'Novo Nordisk ADR',PFE:'Pfizer',BABA:'Alibaba',TSM:'TSMC',SE:'Sea Ltd',JD:'JD.com',BA:'Boeing',DIS:'Walt Disney',NFLX:'Netflix',SPOT:'Spotify',ADBE:'Adobe',CRM:'Salesforce',ORCL:'Oracle',SAP:'SAP',ULVR:'Unilever',DTE:'Deutsche Telekom',SIE:'Siemens',DPW:'Deutsche Post',RWE:'RWE','SOI.PA':'Soitec','AIR.PA':'Airbus','MC.PA':'LVMH','TTE.PA':'TotalEnergies','SU.PA':'Schneider El.','BESI.AS':'Besi','IFX.DE':'Infineon','ABBN.SW':'ABB','RR.L':'Rolls-Royce','SAF.PA':'Safran','HO.PA':'Thales','LDO.MI':'Leonardo','HAG.DE':'Hensoldt','RHM.DE':'Rheinmetall','1810.HK':'Xiaomi','005930.KS':'Samsung','CAT':'Caterpillar','MS':'Morgan Stanley','GS':'Goldman Sachs','ALV.DE':'Allianz','UNH':'UnitedHealth','JPM':'JPMorgan','NVO':'Novo Nordisk ADR','PFE':'Pfizer','BABA':'Alibaba','TSM':'TSMC','SE':'Sea Ltd','JD':'JD.com','BA':'Boeing','DIS':'Walt Disney','NFLX':'Netflix','SPOT':'Spotify','ADBE':'Adobe','CRM':'Salesforce','ORCL':'Oracle','SAP':'SAP','ULVR':'Unilever','DTE':'Deutsche Telekom','SIE':'Siemens','DPW':'Deutsche Post','RWE':'RWE','SOI.PA':'Soitec','AIR.PA':'Airbus','MC.PA':'LVMH','TTE.PA':'TotalEnergies','SU.PA':'Schneider El.'}; function rows(data, tbodyId, maxVal, neg) {
 const tbody = document.getElementById(tbodyId);
 tbody.innerHTML = '';
@@ -274,6 +286,26 @@ tbody.innerHTML += `<tr>
      </tr>`;
 }
 }
+=======
+    const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = '';
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center">Keine Signale</td></tr>';
+      return;
+    }
+    for (const r of data) {
+      const pct = Math.min(100, Math.round(Math.abs(r.score) / maxVal * 100));
+      const color = neg ? 'var(--red)' : 'var(--green)';
+      const scoreClass = neg ? 'score-neg' : 'score-pos';
+      tbody.innerHTML += `<tr>
+        <td class="rank">${r.rank}</td>
+        <td class="epic"><a href="https://finance.yahoo.com/quote/${r.epic}" target="_blank" rel="noopener" class="epic-link">${r.epic}<span class="epic-name">${NAMES[r.epic]||''}</span></a></td>
+        <td class="${scoreClass}">${r.score.toFixed(4)}</td>
+        <td><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div></td>
+      </tr>`;
+    }
+  }
+>>>>>>> parent of d5628d1 (fix: add missing NAMES entries and broad section detection)
 
 rows(sections.buy,   't-buy',   maxBuy,   false);
 rows(sections.broad, 't-broad', maxBroad, false);
