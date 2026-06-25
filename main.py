@@ -1,4 +1,3 @@
-@ -1,171 +1,176 @@
 """main.py - Daily entry point for the Momentum Bot.
 
 Drei Report-Sektionen:
