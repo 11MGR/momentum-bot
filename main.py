@@ -1,12 +1,11 @@
 """main.py - Daily entry point for the Momentum Bot.
-
 Drei Report-Sektionen:
-1. THEMATISCHES UNIVERSE  -- persoenliche Interessensgebiete (Halbleiter etc.)
-2. SCORE-ONLY SCREENING   -- rein mechanisch, 40+ globale Large-Caps
+1. THEMATISCHES UNIVERSE -- persoenliche Interessensgebiete (Halbleiter etc.)
+2. SCORE-ONLY SCREENING -- rein mechanisch, 40+ globale Large-Caps
    => zeigt objektiv die staerksten Momentum-Werte, unabhaengig von Praeferenzen
-3. Exit / Avoid           -- schwache Werte aus dem thematischen Universe
+3. Exit / Avoid -- schwache Werte aus dem thematischen Universe
 """
-import os
+
 import logging
 import datetime
 from pathlib import Path
@@ -15,7 +14,7 @@ from config import (
     UNIVERSE, BROAD_UNIVERSE, REGIME_EPIC, REGIME_MA_PERIOD,
     TOP_N_SIGNALS, BROAD_TOP_N, LOG_FILE, REPORT_FILE,
     MAX_POSITIONS, RISK_PER_TRADE_PCT, STOP_LOSS_PCT,
-    DAILY_LOSS_LIMIT_PCT,
+    DAILY_LOSS_LIMIT_PCT, YAHOO_MAP,
 )
 from ig_client import IGClient
 from price_fetcher import fetch_all_prices_yf, check_regime_yf, get_prices_yf
@@ -23,6 +22,7 @@ from scorer import rank_universe
 
 Path("logs").mkdir(exist_ok=True)
 Path("reports").mkdir(exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
@@ -34,16 +34,77 @@ logging.basicConfig(
 logger = logging.getLogger("main")
 
 
+def epic_to_name(epic: str) -> str:
+    name_map = {
+        "ASML": "ASML",
+        "NVDA": "NVIDIA",
+        "IFX.DE": "Infineon",
+        "STM": "STMicroelectronics",
+        "BESI.AS": "BE Semiconductor",
+        "SOI.PA": "Soitec",
+        "AMAT": "Applied Materials",
+        "1810.HK": "Xiaomi",
+        "RHM.DE": "Rheinmetall",
+        "AIR.PA": "Airbus",
+        "LDO.MI": "Leonardo",
+        "HO.PA": "Thales",
+        "SAF.PA": "Safran",
+        "RR.L": "Rolls-Royce",
+        "HAG.DE": "Hensoldt",
+        "SIE.DE": "Siemens Energy",
+        "ABBN.SW": "ABB",
+        "SU.PA": "Schneider Electric",
+        "ENR.DE": "Siemens Energy",
+        "VWS.CO": "Vestas",
+        "AAPL": "Apple",
+        "MSFT": "Microsoft",
+        "GOOGL": "Alphabet",
+        "AMZN": "Amazon",
+        "META": "Meta",
+        "TSM": "TSMC",
+        "AVGO": "Broadcom",
+        "JPM": "JPMorgan",
+        "GS": "Goldman Sachs",
+        "MS": "Morgan Stanley",
+        "BLK": "BlackRock",
+        "CAT": "Caterpillar",
+        "GE": "GE Aerospace",
+        "HON": "Honeywell",
+        "DE": "Deere",
+        "FCX": "Freeport-McMoRan",
+        "XOM": "ExxonMobil",
+        "CVX": "Chevron",
+        "LLY": "Eli Lilly",
+        "UNH": "UnitedHealth",
+        "AMGN": "Amgen",
+        "NEM": "Newmont",
+        "COST": "Costco",
+        "WMT": "Walmart",
+        "MC.PA": "LVMH",
+        "OR.PA": "L'Oreal",
+        "NESN.SW": "Nestle",
+        "NOVO-B.CO": "Novo Nordisk",
+        "SAP.DE": "SAP",
+        "ALV.DE": "Allianz",
+        "005930.KS": "Samsung Electronics",
+        "9988.HK": "Alibaba HK",
+        "BABA": "Alibaba ADR",
+        "NOC": "Northrop Grumman",
+    }
+    return name_map.get(epic, epic)
+
+
 def build_table(ranked: list) -> str:
-    """Build a markdown table from a ranked list of dicts with 'epic' and 'score'."""
+    """Build a markdown table with company names shown under EPIC."""
     lines = [
         "| Rank | EPIC | Score |",
         "|------|------|-------|",
     ]
     for i, item in enumerate(ranked, 1):
         epic = item.get("epic", "?")
+        display_name = epic_to_name(epic)
         score = item.get("score", 0.0)
-        lines.append(f"| {i} | {epic} | {score:.4f} |")
+        lines.append(f"| {i} | {display_name} | {score:.4f} |")
     return "\n".join(lines)
 
 
@@ -63,46 +124,36 @@ def get_balance(ig: IGClient) -> float:
 def main():
     logger.info("=== Momentum Bot starting ===")
 
-    # --- IG Login (auto-login happens in IGClient.__init__) ---
     ig = IGClient()
     balance = get_balance(ig)
     logger.info(f"Account balance: EUR {balance:,.2f}")
 
-    # --- Market Regime Check ---
     logger.info("Checking market regime via Yahoo Finance...")
     bullish = check_regime_yf(REGIME_EPIC, REGIME_MA_PERIOD)
     regime_label = "BULLISH" if bullish else "BEARISH"
     logger.info(f"Market regime: {regime_label}")
 
-    # --- Fetch benchmark prices (used as relative-strength reference) ---
     logger.info(f"Fetching benchmark prices for {REGIME_EPIC}...")
     benchmark_prices = get_prices_yf(REGIME_EPIC) or []
 
-    # --- Fetch prices for THEMATIC UNIVERSE ---
     logger.info("Fetching price data for universe via Yahoo Finance...")
     price_map = fetch_all_prices_yf(UNIVERSE)
     logger.info(f"Price data fetched for {len(price_map)}/{len(UNIVERSE)} instruments.")
 
-    # --- Score THEMATIC UNIVERSE ---
     logger.info("Scoring universe...")
     ranked_all = rank_universe(UNIVERSE, price_map, benchmark_prices)
 
-    # Top buy signals (positive score, up to TOP_N_SIGNALS)
     top_signals = [r for r in ranked_all if r.get("score", 0) > 0][:TOP_N_SIGNALS]
-    # Exit / Avoid signals (negative score)
     exit_signals = [r for r in ranked_all if r.get("score", 0) < 0]
 
-    # --- Fetch prices for BROAD_UNIVERSE (Score-Only) ---
     logger.info("Fetching price data for BROAD_UNIVERSE via Yahoo Finance...")
     broad_price_map = fetch_all_prices_yf(BROAD_UNIVERSE)
     logger.info(f"Broad price data fetched for {len(broad_price_map)}/{len(BROAD_UNIVERSE)} instruments.")
 
-    # --- Score BROAD_UNIVERSE ---
     logger.info("Scoring BROAD_UNIVERSE...")
     broad_ranked_all = rank_universe(BROAD_UNIVERSE, broad_price_map, benchmark_prices)
     broad_top = [r for r in broad_ranked_all if r.get("score", 0) > 0][:BROAD_TOP_N]
 
-    # --- Build Report ---
     today = datetime.date.today().isoformat()
     report_lines = [
         "# Momentum Bot Daily Report",
@@ -116,6 +167,7 @@ def main():
         "## 1. Thematisches Universe - Top Buy Signals",
         "",
     ]
+
     if top_signals:
         report_lines.append(build_table(top_signals))
     else:
@@ -130,6 +182,7 @@ def main():
         f"_Top {BROAD_TOP_N} globale Large-Caps nach reinem Momentum-Score:_",
         "",
     ]
+
     if broad_top:
         report_lines.append(build_table(broad_top))
     else:
@@ -142,6 +195,7 @@ def main():
         "## 3. Exit / Avoid Signals (Thematisches Universe)",
         "",
     ]
+
     if exit_signals:
         report_lines.append(build_table(exit_signals))
     else:
@@ -155,19 +209,16 @@ def main():
 
     report = "\n".join(report_lines)
 
-    # --- Save Report ---
     with open(REPORT_FILE, "w") as f:
         f.write(report)
     logger.info(f"Report saved to {REPORT_FILE}")
-       # --- Dashboard Report (docs/report.md fuer GitHub Pages) ---
+
     Path("docs").mkdir(exist_ok=True)
     with open("docs/report.md", "w") as f:
         f.write(report)
     logger.info("Dashboard report saved to docs/report.md")
 
-    # --- Print Report to Logs ---
     print(report)
-
     logger.info("=== Momentum Bot finished ===")
 
 
