@@ -237,15 +237,15 @@ function parseAndRender(md) {
 
   // Sections
   let section = null;
-  const sections = { buy: [], broad: [], exit: [] };
+  const sections = { buy: [], broad: [], exit: [], penny: [] };
 
   for (const line of lines) {
-        if (line.includes('Score-Only') || line.includes('Breites')) { section = 'broad'; continue; } if (line.includes('Exit') || line.includes('Avoid')) { section = 'exit'; continue; }
+        const sections = { buy: [], broad: [], eif (line.includes('Penny') || line.includes('Unter-5-Euro')) { section = 'penny'; continue; } if (line.includes('Score-Only') || line.includes('Breites')) { section = 'broad'; continue; }xit: [], penny: [] }; if (line.includes('Exit') || line.includes('Avoid')) { section = 'exit'; continue; }
             if (line.includes('Top Buy') || (line.includes('Thematisches') && !line.includes('Exit') && !line.includes('Avoid'))) { section = 'buy'; continue; }
     if (line.includes('Exit')) { section = 'exit'; continue; }
     if (!section) continue;
-    const m = line.match(/^\|\s*(\d+)\s*\|\s*([\w.\-:]+)\s*\|\s*([\d.\-]+)\s*\|/);
-    if (m) sections[section].push({ rank: m[1], epic: m[2], score: parseFloat(m[3]) });
+            const m = line.match(/^\|\s*(\d+)\s*\|\s*([\w.\-:]+)\s*\|\s*([\d.\-]+)\s*\|\s*([\d.\-]+)\s*\|/);
+            if (m) sections[section].push({ rank: m[1], epic: m[2], price: parseFloat(m[3]), score: parseFloat(m[4]) });
   }
 
   // Max scores for bar scaling
