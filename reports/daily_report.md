@@ -10,13 +10,13 @@
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | Soitec | 1.3506 |
-| 2 | Applied Materials | 1.1264 |
-| 3 | STMicroelectronics | 1.1196 |
-| 4 | Infineon | 0.9262 |
-| 5 | BE Semiconductor | 0.8215 |
+| 1 | SOI.PA | 1.3506 |
+| 2 | AMAT | 1.1264 |
+| 3 | STM | 1.1196 |
+| 4 | IFX.DE | 0.9262 |
+| 5 | BESI.AS | 0.8215 |
 | 6 | ASML | 0.6441 |
-| 7 | ABB | 0.5347 |
+| 7 | ABBN.SW | 0.5347 |
 
 ---
 
@@ -26,16 +26,16 @@ _Top 10 globale Large-Caps nach reinem Momentum-Score:_
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | Samsung Electronics | 1.9577 |
-| 2 | Caterpillar | 0.8068 |
-| 3 | TSMC | 0.5853 |
-| 4 | Alphabet | 0.4658 |
-| 5 | Morgan Stanley | 0.4330 |
-| 6 | Goldman Sachs | 0.4228 |
-| 7 | UnitedHealth | 0.3955 |
-| 8 | GE Aerospace | 0.3617 |
-| 9 | Freeport-McMoRan | 0.3336 |
-| 10 | Eli Lilly | 0.3165 |
+| 1 | 005930.KS | 1.9577 |
+| 2 | CAT | 0.8068 |
+| 3 | TSM | 0.5853 |
+| 4 | GOOGL | 0.4658 |
+| 5 | MS | 0.4330 |
+| 6 | GS | 0.4228 |
+| 7 | UNH | 0.3955 |
+| 8 | GE | 0.3617 |
+| 9 | FCX | 0.3336 |
+| 10 | LLY | 0.3165 |
 
 ---
 
@@ -43,8 +43,8 @@ _Top 10 globale Large-Caps nach reinem Momentum-Score:_
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | Rheinmetall | -0.1859 |
-| 2 | Xiaomi | -0.2489 |
+| 1 | RHM.DE | -0.1859 |
+| 2 | 1810.HK | -0.2489 |
 
 ---
 *This report is generated automatically. Always verify before trading.*
