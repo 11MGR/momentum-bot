@@ -162,7 +162,7 @@ def rank_universe(
             continue
         s = score_instrument(prices, benchmark_prices)
         closes = _extract_closes(prices)
-            price = round(closes[-1], 4) if closes else 0.0
-            results.append({"epic": epic, "score": s, "price": price})
+            price = round(closes[-1], 4) if close else 0.0
+                  results.append({"epic": epic, "score": s, "price": price})
     results.sort(key=lambda x: x["score"], reverse=True)
   return results
