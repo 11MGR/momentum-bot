@@ -1,37 +1,39 @@
+@ -1,19 +1,23 @@
 name: Daily Momentum Run
 
 on:
   schedule:
     # Mo-Fr 17:00 UTC = 18:00 CEST (EU market close + 1h buffer)
     - cron: '0 17 * * 1-5'
-  workflow_dispatch:  # allow manual trigger
+  workflow_dispatch: # allow manual trigger
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run momentum bot
-        env:
-          IG_API_KEY:    ${{ secrets.IG_API_KEY }}
-          IG_USERNAME:   ${{ secrets.IG_USERNAME }}
-          IG_PASSWORD:   ${{ secrets.IG_PASSWORD }}
-          IG_ACC_TYPE:   ${{ secrets.IG_ACC_TYPE }}
+@ -33,19 +37,28 @@
           IG_ACC_NUMBER: ${{ secrets.IG_ACC_NUMBER }}
         run: python main.py
+
+      - name: Publish Dashboard Report to GitHub Pages
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/report.md
+          git diff --staged --quiet || git commit -m "chore: update dashboard report $(date +'%Y-%m-%d')"
+          git push
 
       - name: Upload daily report
         if: always()
