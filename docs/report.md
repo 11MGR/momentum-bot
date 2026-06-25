@@ -1,6 +1,4 @@
-
 # Momentum Bot Daily Report
-
 **Date:** 2026-06-24
 **Market Regime:** BULLISH
 **Account Balance:** EUR 30,000.00
