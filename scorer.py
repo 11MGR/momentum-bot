@@ -161,5 +161,5 @@ def rank_universe(
             logger.debug("Skipping %s - keine Preisdaten", epic)
             continue
         s = score_instrument(prices, benchmark_prices)
-        results.append({"epic": epic, "score": s})                                )results.sort(key=lambda x: x["score"], reverse=True)
-  return results
+        results.append({"epic": epic, "score": s})
+          results.sort(key=lambda x: x["score"], reverse=True)
