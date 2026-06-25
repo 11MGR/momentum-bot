@@ -162,4 +162,4 @@ def rank_universe(
             continue
         s = score_instrument(prices, benchmark_prices)
         results.append({"epic": epic, "score": s})
-          results.sort(key=lambda x: x["score"], reverse=True)
+      results.sort(key=lambda x: x["score"], reverse=True)
