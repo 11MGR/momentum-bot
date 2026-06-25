@@ -164,6 +164,5 @@ def rank_universe(
         closes = _extract_closes(prices)
             price = round(closes[-1], 4) if closes else 0.0
             results.append({"epic": epic, "score": s, "price": price})
-        logger.info(" Scored %s: %.4f", epic, s)
-    results.sort(key=lambda x: x["score"], reverse=True)
+        price = round(closes[-1], 4) if closes else 0.0    results.sort(key=lambda x: x["score"], reverse=True)
     return results
