@@ -43,7 +43,7 @@ def build_table(ranked: list) -> str:
     for i, item in enumerate(ranked, 1):
         epic = item.get("epic", "?")
         score = item.get("score", 0.0)
-                e = item.get("price", 0.0)
+                        price = item.get("price", 0.0)
         lines.append(f"| {i} | {epic} | {price:.2f} | {score:.4f} |")
     return "\n".join(lines)
 
