@@ -37,13 +37,13 @@ logger = logging.getLogger("main")
 def build_table(ranked: list) -> str:
     """Build a markdown table from a ranked list of dicts with 'epic' and 'score'."""
     lines = [
-                "| Rank | EPIC | Price | Score |",
-                "|------|------|-------|-------|"
+        "| Rank | EPIC | Price | Score |",
+        "|------|------|-------|-------|"
     ]
     for i, item in enumerate(ranked, 1):
         epic = item.get("epic", "?")
         score = item.get("score", 0.0)
-    price = item.get("price", 0.0)
+        price = item.get("price", 0.0)
         lines.append(f"| {i} | {epic} | {price:.2f} | {score:.4f} |")
     return "\n".join(lines)
 
