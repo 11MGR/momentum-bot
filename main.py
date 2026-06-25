@@ -1,3 +1,4 @@
+@ -1,171 +1,176 @@
 """main.py - Daily entry point for the Momentum Bot.
 
 Drei Report-Sektionen:
@@ -37,14 +38,13 @@ logger = logging.getLogger("main")
 def build_table(ranked: list) -> str:
     """Build a markdown table from a ranked list of dicts with 'epic' and 'score'."""
     lines = [
-        "| Rank | EPIC | Price | Score |",
-        "|------|------|-------|-------|"
+        "| Rank | EPIC | Score |",
+        "|------|------|-------|",
     ]
     for i, item in enumerate(ranked, 1):
         epic = item.get("epic", "?")
         score = item.get("score", 0.0)
-        price = item.get("price", 0.0)
-        lines.append(f"| {i} | {epic} | {price:.2f} | {score:.4f} |")
+        lines.append(f"| {i} | {epic} | {score:.4f} |")
     return "\n".join(lines)
 
 
@@ -147,28 +147,6 @@ def main():
         report_lines.append(build_table(exit_signals))
     else:
         report_lines.append("_Keine Exit-Signale._")
-
-        # --- Sektion 4: Unter-5-Euro-Aktien ---
-        penny_signals = [r for r in ranked_all + broad_ranked_all if r.get("price", 999) < 5.0 and r.get("score", 0) > 0]
-        penny_signals = sorted(penny_signals, key=lambda x: x["score"], reverse=True)
-        # Deduplizieren
-        seen = set()
-        penny_unique = []
-        for r in penny_signals:
-            if r["epic"] not in seen:
-                seen.add(r["epic"])
-                penny_unique.append(r)
-        report_lines += [
-            "",
-            "---",
-            "",
-            "## 4. Penny Stocks (Preis < 5 EUR) - Positive Momentum",
-            "",
-        ]
-        if penny_unique:
-            report_lines.append(build_table(penny_unique))
-        else:
-            report_lines.append("_Keine Penny-Stock-Signale._") 
 
     report_lines += [
         "",
