@@ -29,9 +29,9 @@ jobs:
 
       - name: Run bot
         env:
-          IG_ACC_NUMBER: ${{ secrets.IG_ACC_NUMBER }}
+          IG_ACC_NUMBER: ${{ secrets.IG_ACC_NUMBER
+}}
         run: python main.py
-
       - name: Publish Dashboard Report to GitHub Pages
         if: always()
         run: |
