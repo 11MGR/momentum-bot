@@ -120,7 +120,7 @@
       display: inline-block;
       vertical-align: middle;
     }
-    .bar-fill { height: 100%; border-radius: 3px; }
+    .bar-fill { height: 100%; border-radius: 3px; } .epic-link { text-decoration: none; color: var(--blue); display: flex; flex-direction: column; gap: 2px; } .epic-link:hover { text-decoration: underline; } .epic-name { font-size: 0.72rem; font-weight: 400; font-family: sans-serif; color: var(--muted); }
     .stat-row {
       display: flex;
       gap: 16px;
@@ -253,7 +253,7 @@ function parseAndRender(md) {
   const maxBroad = Math.max(...sections.broad.map(r => Math.abs(r.score)), 0.01);
   const maxExit  = Math.max(...sections.exit.map(r => Math.abs(r.score)), 0.01);
 
-  function rows(data, tbodyId, maxVal, neg) {
+  const NAMES={NVDA:'Nvidia',TSLA:'Tesla',AAPL:'Apple',MSFT:'Microsoft',AMZN:'Amazon',GOOGL:'Alphabet',META:'Meta',ASML:'ASML',AMD:'AMD',INTC:'Intel',QCOM:'Qualcomm',MU:'Micron',AMAT:'Appl. Materials',KLAC:'KLA Corp',LRCX:'Lam Research',STM:'STMicroelectronics',TXN:'Texas Instruments',AVGO:'Broadcom',ARM:'Arm Holdings',V:'Visa',MA:'Mastercard',JPM:'JPMorgan',BAC:'Bank of America',GS:'Goldman Sachs',BLK:'BlackRock',NOVO_B:'Novo Nordisk',SAN:'Sanofi',ROG:'Roche',AZN:'AstraZeneca',NOVN:'Novartis',NVO:'Novo Nordisk ADR',PFE:'Pfizer',BABA:'Alibaba',TSM:'TSMC',SE:'Sea Ltd',JD:'JD.com',BA:'Boeing',DIS:'Walt Disney',NFLX:'Netflix',SPOT:'Spotify',ADBE:'Adobe',CRM:'Salesforce',ORCL:'Oracle',SAP:'SAP',ULVR:'Unilever',DTE:'Deutsche Telekom',SIE:'Siemens',DPW:'Deutsche Post',RWE:'RWE','SOI.PA':'Soitec','AIR.PA':'Airbus','MC.PA':'LVMH','TTE.PA':'TotalEnergies','SU.PA':'Schneider El.'}; function rows(data, tbodyId, maxVal, neg) {
     const tbody = document.getElementById(tbodyId);
     tbody.innerHTML = '';
     if (!data.length) {
@@ -266,7 +266,7 @@ function parseAndRender(md) {
       const scoreClass = neg ? 'score-neg' : 'score-pos';
       tbody.innerHTML += `<tr>
         <td class="rank">${r.rank}</td>
-        <td class="epic">${r.epic}</td>
+        <td class="epic"><a href="https://finance.yahoo.com/quote/${r.epic}" target="_blank" rel="noopener" class="epic-link">${r.epic}<span class="epic-name">${NAMES[r.epic]||''}</span></a></td>
         <td class="${scoreClass}">${r.score.toFixed(4)}</td>
         <td><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div></td>
       </tr>`;
