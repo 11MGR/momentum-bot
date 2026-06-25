@@ -1,10 +1,4 @@
-"""main.py - Daily entry point for the Momentum Bot.
-Drei Report-Sektionen:
-1. THEMATISCHES UNIVERSE -- persoenliche Interessensgebiete (Halbleiter etc.)
-2. SCORE-ONLY SCREENING -- rein mechanisch, 40+ globale Large-Caps
-   => zeigt objektiv die staerksten Momentum-Werte, unabhaengig von Praeferenzen
-3. Exit / Avoid -- schwache Werte aus dem thematischen Universe
-"""
+"""main.py - Daily entry point for the Momentum Bot."""
 
 import logging
 import datetime
@@ -34,82 +28,19 @@ logging.basicConfig(
 logger = logging.getLogger("main")
 
 
-def epic_to_name(epic: str) -> str:
-    name_map = {
-        "ASML": "ASML",
-        "NVDA": "NVIDIA",
-        "IFX.DE": "Infineon",
-        "STM": "STMicroelectronics",
-        "BESI.AS": "BE Semiconductor",
-        "SOI.PA": "Soitec",
-        "AMAT": "Applied Materials",
-        "1810.HK": "Xiaomi",
-        "RHM.DE": "Rheinmetall",
-        "AIR.PA": "Airbus",
-        "LDO.MI": "Leonardo",
-        "HO.PA": "Thales",
-        "SAF.PA": "Safran",
-        "RR.L": "Rolls-Royce",
-        "HAG.DE": "Hensoldt",
-        "SIE.DE": "Siemens Energy",
-        "ABBN.SW": "ABB",
-        "SU.PA": "Schneider Electric",
-        "ENR.DE": "Siemens Energy",
-        "VWS.CO": "Vestas",
-        "AAPL": "Apple",
-        "MSFT": "Microsoft",
-        "GOOGL": "Alphabet",
-        "AMZN": "Amazon",
-        "META": "Meta",
-        "TSM": "TSMC",
-        "AVGO": "Broadcom",
-        "JPM": "JPMorgan",
-        "GS": "Goldman Sachs",
-        "MS": "Morgan Stanley",
-        "BLK": "BlackRock",
-        "CAT": "Caterpillar",
-        "GE": "GE Aerospace",
-        "HON": "Honeywell",
-        "DE": "Deere",
-        "FCX": "Freeport-McMoRan",
-        "XOM": "ExxonMobil",
-        "CVX": "Chevron",
-        "LLY": "Eli Lilly",
-        "UNH": "UnitedHealth",
-        "AMGN": "Amgen",
-        "NEM": "Newmont",
-        "COST": "Costco",
-        "WMT": "Walmart",
-        "MC.PA": "LVMH",
-        "OR.PA": "L'Oreal",
-        "NESN.SW": "Nestle",
-        "NOVO-B.CO": "Novo Nordisk",
-        "SAP.DE": "SAP",
-        "ALV.DE": "Allianz",
-        "005930.KS": "Samsung Electronics",
-        "9988.HK": "Alibaba HK",
-        "BABA": "Alibaba ADR",
-        "NOC": "Northrop Grumman",
-    }
-    return name_map.get(epic, epic)
-
-
 def build_table(ranked: list) -> str:
-    """Build a markdown table with company names shown under EPIC."""
     lines = [
         "| Rank | EPIC | Score |",
         "|------|------|-------|",
     ]
     for i, item in enumerate(ranked, 1):
         epic = item.get("epic", "?")
-        display_name = epic_to_name(epic)
         score = item.get("score", 0.0)
-        lines.append(f"| {i} | {display_name} | {score:.4f} |")
+        lines.append(f"| {i} | {epic} | {score:.4f} |")
     return "\n".join(lines)
 
 
 def get_balance(ig: IGClient) -> float:
-    """Extract available balance from account info."""
     try:
         info = ig.get_account_info()
         accounts = info.get("accounts", [])
