@@ -1,5 +1,5 @@
 # Momentum Bot Daily Report
-**Date:** 2026-07-15
+**Date:** 2026-07-16
 **Market Regime:** BULLISH
 **Account Balance:** EUR 30,000.00
 **Price Source:** Yahoo Finance (yfinance)
@@ -10,13 +10,13 @@
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | SOI.PA | 0.9701 |
-| 2 | AMAT | 0.9295 |
-| 3 | STM | 0.8674 |
-| 4 | IFX.DE | 0.6237 |
-| 5 | ASML | 0.5588 |
-| 6 | BESI.AS | 0.5105 |
-| 7 | ABBN.SW | 0.4787 |
+| 1 | AMAT | 0.8819 |
+| 2 | SOI.PA | 0.8505 |
+| 3 | STM | 0.8273 |
+| 4 | ASML | 0.5778 |
+| 5 | IFX.DE | 0.5367 |
+| 6 | BESI.AS | 0.4495 |
+| 7 | ABBN.SW | 0.4390 |
 
 ---
 
@@ -26,16 +26,16 @@ _Top 10 globale Large-Caps nach reinem Momentum-Score:_
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | 005930.KS | 1.1927 |
-| 2 | CAT | 0.6023 |
-| 3 | TSM | 0.4324 |
-| 4 | GOOGL | 0.4273 |
-| 5 | GS | 0.4147 |
-| 6 | MS | 0.4095 |
-| 7 | UNH | 0.3805 |
-| 8 | AAPL | 0.3595 |
-| 9 | LLY | 0.3217 |
-| 10 | GE | 0.2858 |
+| 1 | 005930.KS | 1.3097 |
+| 2 | CAT | 0.5705 |
+| 3 | GOOGL | 0.4473 |
+| 4 | TSM | 0.4210 |
+| 5 | GS | 0.4113 |
+| 6 | MS | 0.4048 |
+| 7 | AAPL | 0.3995 |
+| 8 | UNH | 0.3699 |
+| 9 | LLY | 0.3206 |
+| 10 | GE | 0.2877 |
 
 ---
 
@@ -43,9 +43,9 @@ _Top 10 globale Large-Caps nach reinem Momentum-Score:_
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | HAG.DE | -0.0282 |
-| 2 | 1810.HK | -0.1713 |
-| 3 | RHM.DE | -0.2051 |
+| 1 | HAG.DE | -0.0194 |
+| 2 | 1810.HK | -0.1702 |
+| 3 | RHM.DE | -0.2053 |
 
 ---
 *This report is generated automatically. Always verify before trading.*
