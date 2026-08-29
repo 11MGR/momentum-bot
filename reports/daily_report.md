@@ -1,5 +1,5 @@
 # Momentum Bot Daily Report
-**Date:** 2026-08-28
+**Date:** 2026-08-29
 **Market Regime:** BULLISH
 **Account Balance:** EUR 30,000.00
 **Price Source:** Yahoo Finance (yfinance)
@@ -10,13 +10,13 @@
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | SOI.PA | 0.8301 |
-| 2 | AMAT | 0.6594 |
-| 3 | ASML | 0.5073 |
-| 4 | VWS.CO | 0.3816 |
-| 5 | STM | 0.3726 |
-| 6 | RR.L | 0.3289 |
-| 7 | SU.PA | 0.3004 |
+| 1 | SOI.PA | 0.9176 |
+| 2 | AMAT | 0.6058 |
+| 3 | ASML | 0.4777 |
+| 4 | VWS.CO | 0.4117 |
+| 5 | STM | 0.3398 |
+| 6 | RR.L | 0.3241 |
+| 7 | SU.PA | 0.2868 |
 
 ---
 
@@ -27,15 +27,15 @@ _Top 10 globale Large-Caps nach reinem Momentum-Score:_
 | Rank | EPIC | Score |
 |------|------|-------|
 | 1 | 005930.KS | 0.8572 |
-| 2 | FCX | 0.4131 |
-| 3 | NEM | 0.4112 |
-| 4 | AMGN | 0.3802 |
-| 5 | TSM | 0.3662 |
-| 6 | CAT | 0.3454 |
-| 7 | LLY | 0.3297 |
-| 8 | MS | 0.3173 |
-| 9 | UNH | 0.3104 |
-| 10 | ALV.DE | 0.3069 |
+| 2 | FCX | 0.3927 |
+| 3 | NEM | 0.3696 |
+| 4 | AMGN | 0.3660 |
+| 5 | TSM | 0.3463 |
+| 6 | CAT | 0.3288 |
+| 7 | MS | 0.3277 |
+| 8 | LLY | 0.3270 |
+| 9 | GOOGL | 0.3030 |
+| 10 | ALV.DE | 0.3010 |
 
 ---
 
@@ -43,7 +43,7 @@ _Top 10 globale Large-Caps nach reinem Momentum-Score:_
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | RHM.DE | -0.0739 |
+| 1 | RHM.DE | -0.0428 |
 | 2 | 1810.HK | -0.1084 |
 
 ---
