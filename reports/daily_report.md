@@ -1,5 +1,5 @@
 # Momentum Bot Daily Report
-**Date:** 2026-11-17
+**Date:** 2026-11-18
 **Market Regime:** BEARISH
 **Account Balance:** EUR 30,000.00
 **Price Source:** Yahoo Finance (yfinance)
@@ -10,13 +10,13 @@
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | SOI.PA | 0.4421 |
-| 2 | STM | 0.2235 |
-| 3 | SIE.DE | 0.2031 |
-| 4 | AIR.PA | 0.1845 |
-| 5 | VWS.CO | 0.1836 |
-| 6 | RR.L | 0.1756 |
-| 7 | ASML | 0.1512 |
+| 1 | SOI.PA | 0.7029 |
+| 2 | STM | 0.2318 |
+| 3 | SIE.DE | 0.1959 |
+| 4 | RR.L | 0.1799 |
+| 5 | AIR.PA | 0.1672 |
+| 6 | ASML | 0.1482 |
+| 7 | VWS.CO | 0.1365 |
 
 ---
 
@@ -26,16 +26,16 @@ _Top 10 globale Large-Caps nach reinem Momentum-Score:_
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | LLY | 0.3758 |
-| 2 | AMGN | 0.3539 |
-| 3 | OR.PA | 0.3097 |
-| 4 | ALV.DE | 0.3059 |
-| 5 | DE | 0.2935 |
-| 6 | CVX | 0.2893 |
-| 7 | AAPL | 0.2878 |
-| 8 | SAP.DE | 0.2713 |
-| 9 | XOM | 0.2616 |
-| 10 | COST | 0.2424 |
+| 1 | LLY | 0.3436 |
+| 2 | AMGN | 0.3297 |
+| 3 | OR.PA | 0.2943 |
+| 4 | DE | 0.2903 |
+| 5 | ALV.DE | 0.2874 |
+| 6 | AAPL | 0.2804 |
+| 7 | CVX | 0.2751 |
+| 8 | XOM | 0.2571 |
+| 9 | COST | 0.2378 |
+| 10 | WMT | 0.2207 |
 
 ---
 
@@ -43,9 +43,9 @@ _Top 10 globale Large-Caps nach reinem Momentum-Score:_
 
 | Rank | EPIC | Score |
 |------|------|-------|
-| 1 | BESI.AS | -0.0332 |
-| 2 | NVDA | -0.0596 |
-| 3 | RHM.DE | -0.2204 |
+| 1 | BESI.AS | -0.0563 |
+| 2 | NVDA | -0.0633 |
+| 3 | RHM.DE | -0.2247 |
 
 ---
 *This report is generated automatically. Always verify before trading.*
